@@ -1,0 +1,15 @@
+# json_serializable defaults to `explicit_to_json: false`, which emits
+# `'vitals': instance.vitals` — a nested *object*, not a map. That survives a
+# `jsonEncode` (the encoder calls `toJson` itself), so anything that goes
+# through the database or the wire works. It breaks the moment a `toJson()`
+# result is handed straight back to a `fromJson`, which is exactly what the
+# locally built timeline does with `TimelineItem.payload` (spec A.2: "the full
+# underlying entity so no second call is needed").
+#
+# Converting eagerly makes `toJson()` mean the same thing everywhere.
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true

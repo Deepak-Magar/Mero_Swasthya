@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The window the OS draws before Flutter has a frame. The colour is
+  AppColors.background (values-night swaps it for the dark scaffold), so the
+  hand-over to S01 is invisible rather than a flash of white.
+
+  Android 12 and newer ignore this and draw their own splash from the launcher
+  icon; values-v31/styles.xml sets the colour for that path. This file is what
+  older handsets use.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_mark" />
+    </item>
+</layer-list>

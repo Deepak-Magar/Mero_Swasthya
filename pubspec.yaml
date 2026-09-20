@@ -1,0 +1,140 @@
+name: mero_swasthya
+description: "Mero Swasthya - offline-first patient health record with maternal care for rural Nepal."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  go_router: ^17.5.0
+  drift: ">=2.20.0 <2.35.0"
+  sqlite3_flutter_libs: ^0.6.0+eol
+  dio: ^5.11.1
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+  flutter_secure_storage: ^11.2.0
+  connectivity_plus: ^7.3.1
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.2
+  image_picker: ^1.2.3
+  flutter_image_compress: ^2.5.1
+  nepali_utils: ^3.0.8
+  nepali_date_picker: ^7.0.1
+  intl: ^0.20.2
+  uuid: ^4.6.0
+  url_launcher: ^6.3.2
+  shared_preferences: ^2.5.5
+  crypto: ^3.0.7
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  flutter_localizations:
+    sdk: flutter
+  flutter_local_notifications: ^22.3.1
+  flutter_tts: ^4.2.5
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  share_plus: ^13.3.0
+  timezone: ^0.11.1
+  speech_to_text: ^7.4.0
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  fl_chart: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+  # Generates the Android mipmaps and the adaptive/themed icon layers from
+  # assets/brand. Dev-only: it runs once and writes into android/.
+  flutter_launcher_icons: ^0.14.4
+  build_runner: ^2.15.1
+  freezed: ^3.2.5
+  json_serializable: ^6.14.1
+  drift_dev: ">=2.20.0 <2.35.0"
+  mocktail: ^1.0.5
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/rules.json
+    - assets/codelists.json
+    - assets/facilities.json
+    - assets/epi_schedule.json
+    - assets/who_wfa.json
+    # The brand marks. Everything here is generated from the supplied
+    # logo.jpeg by tools/brand/make_brand.py; nothing is hand-edited.
+    #
+    # Listed file by file rather than as a directory on purpose:
+    # assets/brand/icon/ holds the 1024-square launcher sources, which
+    # flutter_launcher_icons reads from disk at build time and which have no
+    # business being in the APK.
+    - assets/brand/logo_full.png
+    - assets/brand/logo_full_dark.png
+    - assets/brand/logo_mark.png
+    - assets/brand/logo_mark_white.png
+
+  # Devanagari for the PDF export. The `pdf` package embeds only what it is
+  # given, and Flutter's own font fallback does not reach into a generated
+  # document — without these every Nepali string comes out as empty boxes.
+  fonts:
+    - family: NotoSansDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
+        - asset: assets/fonts/NotoSansDevanagari-Bold.ttf
+          weight: 700
+
+# Launcher icons, generated from assets/brand by
+# `dart run flutter_launcher_icons`. iOS is off: this build ships Android only.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  # The legacy (pre-adaptive) icon needs its own ground, so it points at the
+  # mark already composited on white rather than the transparent one.
+  image_path: "assets/brand/icon/logo_mark_on_white.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/brand/icon/icon_foreground.png"
+  # Android 13 themed icons: the system tints this layer to the wallpaper
+  # palette, so it has to be the flat white silhouette.
+  adaptive_icon_monochrome: "assets/brand/icon/icon_monochrome.png"
+  min_sdk_android: 24

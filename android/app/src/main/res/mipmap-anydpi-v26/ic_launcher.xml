@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The foreground and monochrome layers are already drawn inside the central
+  66% of their canvas by tools/brand/make_brand.py, which is the adaptive-icon
+  safe zone. flutter_launcher_icons wraps them in a further 16% inset by
+  default; keeping both shrank the mark to roughly 45% of the icon and left it
+  swimming in white. The insets are dropped here so the artwork's own safe
+  zone is the one that ships.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+  <background android:drawable="@color/ic_launcher_background"/>
+  <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+  <monochrome android:drawable="@drawable/ic_launcher_monochrome"/>
+</adaptive-icon>

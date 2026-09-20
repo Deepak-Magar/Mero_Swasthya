@@ -1,0 +1,129 @@
+{
+  "_comment": "PARTIALLY VERIFIED - see `verification`. Every row below was cross-checked on 2026-09-19 against three independent published summaries of Nepal's national immunisation schedule, which agreed with each other. That found and corrected one real error (fIPV, see `corrections`). It is NOT a check against the official Ministry of Health and Population / Family Welfare Division publication, and it is not a clinical sign-off. Somebody with the official schedule must still confirm every row before a health worker acts on this, and schedules move - fIPV, the PCV booster and TCV have all changed in recent years. The app reads only `vaccines`; `version` is what the mock reports and what a future GET /rules could override.",
+  "version": "epi-2026-09-19.checked",
+  "source": "Cross-checked against published secondary sources, 2026-09-19. Not the official Ministry publication.",
+  "verification": {
+    "checkedOn": "2026-09-19",
+    "method": "Three independent published summaries of the national schedule, compared row by row; all three agreed.",
+    "sources": [
+      "https://publichealthupdate.com/national-immunization-schedule-nepal/ (updated 2024-02-03)",
+      "https://epomedicine.com/medical-students/national-immunization-schedule-of-nepal-2019/ (updated 2024-10-05)",
+      "WHO Nepal / secondary summaries via web search, 2026-09-19"
+    ],
+    "corrections": [
+      "fIPV was 6 and 14 weeks; corrected to 14 weeks and 9 months. All three sources agree on 14 weeks + 9 months, 2 doses, and Nepal moved to the 2-dose fractional schedule from the single 14-week full IPV dose introduced in 2014."
+    ],
+    "confirmedUnchanged": [
+      "BCG at birth",
+      "OPV 6/10/14 weeks",
+      "Pentavalent 6/10/14 weeks",
+      "PCV 6/10 weeks + 9 months",
+      "Rotavirus 6/10 weeks",
+      "MR 9 + 15 months",
+      "JE 12 months - nationwide in routine immunisation since July 2016, not endemic-districts-only",
+      "TCV 15 months"
+    ],
+    "structuralCheck": "The sources state a fully immunised child needs 7 contacts: birth, 6, 10, 14 weeks, 9, 12, 15 months. The corrected schedule produces exactly those seven and no others.",
+    "knownGaps": [
+      "HPV for adolescent girls (school grades 6-10, and out-of-school girls aged 10) is part of the national programme but is outside this module, which stops at five years.",
+      "Td for pregnant women is part of EPI and is handled separately in the ANC contact form, not here.",
+      "A JE vaccine supply shortage was reported in Nepal in 2025. That is a supply problem, not a schedule change, but a due date this app shows may not be a dose a health post can actually give."
+    ]
+  },
+  "vaccines": [
+    {
+      "code": "BCG",
+      "labelEn": "BCG",
+      "labelNp": "बी.सी.जी.",
+      "protectsEn": "Tuberculosis",
+      "protectsNp": "क्षयरोग",
+      "doses": [{ "doseNo": 1, "ageWeeks": 0 }]
+    },
+    {
+      "code": "OPV",
+      "labelEn": "Oral polio",
+      "labelNp": "खोप (पोलियो, मुखबाट)",
+      "protectsEn": "Polio",
+      "protectsNp": "पोलियो",
+      "doses": [
+        { "doseNo": 1, "ageWeeks": 6 },
+        { "doseNo": 2, "ageWeeks": 10 },
+        { "doseNo": 3, "ageWeeks": 14 }
+      ]
+    },
+    {
+      "code": "PENTA",
+      "labelEn": "Pentavalent",
+      "labelNp": "पेन्टाभ्यालेन्ट",
+      "protectsEn": "Diphtheria, pertussis, tetanus, hepatitis B, Hib",
+      "protectsNp": "डिप्थेरिया, हुपिङ खोकी, धनुष्टंकार, हेपाटाइटिस बी, हिब",
+      "doses": [
+        { "doseNo": 1, "ageWeeks": 6 },
+        { "doseNo": 2, "ageWeeks": 10 },
+        { "doseNo": 3, "ageWeeks": 14 }
+      ]
+    },
+    {
+      "code": "PCV",
+      "labelEn": "Pneumococcal",
+      "labelNp": "न्युमोकोकल",
+      "protectsEn": "Pneumonia and meningitis",
+      "protectsNp": "निमोनिया र मेनिन्जाइटिस",
+      "doses": [
+        { "doseNo": 1, "ageWeeks": 6 },
+        { "doseNo": 2, "ageWeeks": 10 },
+        { "doseNo": 3, "ageMonths": 9 }
+      ]
+    },
+    {
+      "code": "ROTA",
+      "labelEn": "Rotavirus",
+      "labelNp": "रोटाभाइरस",
+      "protectsEn": "Severe diarrhoea",
+      "protectsNp": "कडा झाडापखाला",
+      "doses": [
+        { "doseNo": 1, "ageWeeks": 6 },
+        { "doseNo": 2, "ageWeeks": 10 }
+      ]
+    },
+    {
+      "code": "FIPV",
+      "labelEn": "Injectable polio (fIPV)",
+      "labelNp": "पोलियो सुई (fIPV)",
+      "protectsEn": "Polio",
+      "protectsNp": "पोलियो",
+      "_note": "14 weeks and 9 months, NOT 6 and 14 weeks. Corrected 2026-09-19 - see `verification.corrections`. Two fractional intradermal doses replaced the single full IPV dose Nepal introduced at 14 weeks in 2014.",
+      "doses": [
+        { "doseNo": 1, "ageWeeks": 14 },
+        { "doseNo": 2, "ageMonths": 9 }
+      ]
+    },
+    {
+      "code": "MR",
+      "labelEn": "Measles-Rubella",
+      "labelNp": "दादुरा-रुबेला",
+      "protectsEn": "Measles and rubella",
+      "protectsNp": "दादुरा र रुबेला",
+      "doses": [
+        { "doseNo": 1, "ageMonths": 9 },
+        { "doseNo": 2, "ageMonths": 15 }
+      ]
+    },
+    {
+      "code": "JE",
+      "labelEn": "Japanese encephalitis",
+      "labelNp": "जापानिज इन्सेफलाइटिस",
+      "protectsEn": "Japanese encephalitis",
+      "protectsNp": "जापानिज इन्सेफलाइटिस",
+      "doses": [{ "doseNo": 1, "ageMonths": 12 }]
+    },
+    {
+      "code": "TCV",
+      "labelEn": "Typhoid conjugate",
+      "labelNp": "टाइफाइड कन्जुगेट",
+      "protectsEn": "Typhoid",
+      "protectsNp": "टाइफाइड",
+      "doses": [{ "doseNo": 1, "ageMonths": 15 }]
+    }
+  ]
+}

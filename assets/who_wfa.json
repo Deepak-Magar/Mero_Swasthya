@@ -1,0 +1,1244 @@
+{
+  "_comment": "THE OFFICIAL WHO CHILD GROWTH STANDARDS, weight-for-age, birth to 5 years, z-scores. Transcribed by machine from WHO's own simplified field tables (see `source`) on 2026-09-19 - no value here was typed by hand or fitted to a curve. This replaces the hand-fitted illustrative band the app shipped before. Weight-for-age alone cannot separate a short child from a wasted one; it is a screening curve, not a diagnosis, and the screen says so.",
+  "version": "who-cgs-wfa-2006.sft.2026-09-19",
+  "standard": "WHO Child Growth Standards (2006), weight-for-age z-scores",
+  "source": {
+    "retrievedOn": "2026-09-19",
+    "method": "Parsed straight out of the PDFs with pypdfium2; checked for 61 monthly rows per sex, z-score columns in order, monotonic growth, and four anchor months per sex against the published values.",
+    "files": [
+      "https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-boys-z-0-5.pdf",
+      "https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/sft-wfa-girls-z-0-5.pdf"
+    ],
+    "precision": "WHO rounds the simplified field tables to 0.1 kg. That is the precision a health post weighs to, and it is the precision reproduced here."
+  },
+  "unit": "kg",
+  "ageMonthsMin": 0,
+  "ageMonthsMax": 60,
+  "note": "The app draws median and +/-2 SD. The -3 SD column (severely underweight) and the 1 and 3 SD columns are carried so the asset is a faithful copy of the source and a later feature needs no new download.",
+  "series": {
+    "male": [
+      {
+        "ageMonths": 0,
+        "sd3neg": 2.1,
+        "sd2neg": 2.5,
+        "sd1neg": 2.9,
+        "median": 3.3,
+        "sd1pos": 3.9,
+        "sd2pos": 4.4,
+        "sd3pos": 5.0
+      },
+      {
+        "ageMonths": 1,
+        "sd3neg": 2.9,
+        "sd2neg": 3.4,
+        "sd1neg": 3.9,
+        "median": 4.5,
+        "sd1pos": 5.1,
+        "sd2pos": 5.8,
+        "sd3pos": 6.6
+      },
+      {
+        "ageMonths": 2,
+        "sd3neg": 3.8,
+        "sd2neg": 4.3,
+        "sd1neg": 4.9,
+        "median": 5.6,
+        "sd1pos": 6.3,
+        "sd2pos": 7.1,
+        "sd3pos": 8.0
+      },
+      {
+        "ageMonths": 3,
+        "sd3neg": 4.4,
+        "sd2neg": 5.0,
+        "sd1neg": 5.7,
+        "median": 6.4,
+        "sd1pos": 7.2,
+        "sd2pos": 8.0,
+        "sd3pos": 9.0
+      },
+      {
+        "ageMonths": 4,
+        "sd3neg": 4.9,
+        "sd2neg": 5.6,
+        "sd1neg": 6.2,
+        "median": 7.0,
+        "sd1pos": 7.8,
+        "sd2pos": 8.7,
+        "sd3pos": 9.7
+      },
+      {
+        "ageMonths": 5,
+        "sd3neg": 5.3,
+        "sd2neg": 6.0,
+        "sd1neg": 6.7,
+        "median": 7.5,
+        "sd1pos": 8.4,
+        "sd2pos": 9.3,
+        "sd3pos": 10.4
+      },
+      {
+        "ageMonths": 6,
+        "sd3neg": 5.7,
+        "sd2neg": 6.4,
+        "sd1neg": 7.1,
+        "median": 7.9,
+        "sd1pos": 8.8,
+        "sd2pos": 9.8,
+        "sd3pos": 10.9
+      },
+      {
+        "ageMonths": 7,
+        "sd3neg": 5.9,
+        "sd2neg": 6.7,
+        "sd1neg": 7.4,
+        "median": 8.3,
+        "sd1pos": 9.2,
+        "sd2pos": 10.3,
+        "sd3pos": 11.4
+      },
+      {
+        "ageMonths": 8,
+        "sd3neg": 6.2,
+        "sd2neg": 6.9,
+        "sd1neg": 7.7,
+        "median": 8.6,
+        "sd1pos": 9.6,
+        "sd2pos": 10.7,
+        "sd3pos": 11.9
+      },
+      {
+        "ageMonths": 9,
+        "sd3neg": 6.4,
+        "sd2neg": 7.1,
+        "sd1neg": 8.0,
+        "median": 8.9,
+        "sd1pos": 9.9,
+        "sd2pos": 11.0,
+        "sd3pos": 12.3
+      },
+      {
+        "ageMonths": 10,
+        "sd3neg": 6.6,
+        "sd2neg": 7.4,
+        "sd1neg": 8.2,
+        "median": 9.2,
+        "sd1pos": 10.2,
+        "sd2pos": 11.4,
+        "sd3pos": 12.7
+      },
+      {
+        "ageMonths": 11,
+        "sd3neg": 6.8,
+        "sd2neg": 7.6,
+        "sd1neg": 8.4,
+        "median": 9.4,
+        "sd1pos": 10.5,
+        "sd2pos": 11.7,
+        "sd3pos": 13.0
+      },
+      {
+        "ageMonths": 12,
+        "sd3neg": 6.9,
+        "sd2neg": 7.7,
+        "sd1neg": 8.6,
+        "median": 9.6,
+        "sd1pos": 10.8,
+        "sd2pos": 12.0,
+        "sd3pos": 13.3
+      },
+      {
+        "ageMonths": 13,
+        "sd3neg": 7.1,
+        "sd2neg": 7.9,
+        "sd1neg": 8.8,
+        "median": 9.9,
+        "sd1pos": 11.0,
+        "sd2pos": 12.3,
+        "sd3pos": 13.7
+      },
+      {
+        "ageMonths": 14,
+        "sd3neg": 7.2,
+        "sd2neg": 8.1,
+        "sd1neg": 9.0,
+        "median": 10.1,
+        "sd1pos": 11.3,
+        "sd2pos": 12.6,
+        "sd3pos": 14.0
+      },
+      {
+        "ageMonths": 15,
+        "sd3neg": 7.4,
+        "sd2neg": 8.3,
+        "sd1neg": 9.2,
+        "median": 10.3,
+        "sd1pos": 11.5,
+        "sd2pos": 12.8,
+        "sd3pos": 14.3
+      },
+      {
+        "ageMonths": 16,
+        "sd3neg": 7.5,
+        "sd2neg": 8.4,
+        "sd1neg": 9.4,
+        "median": 10.5,
+        "sd1pos": 11.7,
+        "sd2pos": 13.1,
+        "sd3pos": 14.6
+      },
+      {
+        "ageMonths": 17,
+        "sd3neg": 7.7,
+        "sd2neg": 8.6,
+        "sd1neg": 9.6,
+        "median": 10.7,
+        "sd1pos": 12.0,
+        "sd2pos": 13.4,
+        "sd3pos": 14.9
+      },
+      {
+        "ageMonths": 18,
+        "sd3neg": 7.8,
+        "sd2neg": 8.8,
+        "sd1neg": 9.8,
+        "median": 10.9,
+        "sd1pos": 12.2,
+        "sd2pos": 13.7,
+        "sd3pos": 15.3
+      },
+      {
+        "ageMonths": 19,
+        "sd3neg": 8.0,
+        "sd2neg": 8.9,
+        "sd1neg": 10.0,
+        "median": 11.1,
+        "sd1pos": 12.5,
+        "sd2pos": 13.9,
+        "sd3pos": 15.6
+      },
+      {
+        "ageMonths": 20,
+        "sd3neg": 8.1,
+        "sd2neg": 9.1,
+        "sd1neg": 10.1,
+        "median": 11.3,
+        "sd1pos": 12.7,
+        "sd2pos": 14.2,
+        "sd3pos": 15.9
+      },
+      {
+        "ageMonths": 21,
+        "sd3neg": 8.2,
+        "sd2neg": 9.2,
+        "sd1neg": 10.3,
+        "median": 11.5,
+        "sd1pos": 12.9,
+        "sd2pos": 14.5,
+        "sd3pos": 16.2
+      },
+      {
+        "ageMonths": 22,
+        "sd3neg": 8.4,
+        "sd2neg": 9.4,
+        "sd1neg": 10.5,
+        "median": 11.8,
+        "sd1pos": 13.2,
+        "sd2pos": 14.7,
+        "sd3pos": 16.5
+      },
+      {
+        "ageMonths": 23,
+        "sd3neg": 8.5,
+        "sd2neg": 9.5,
+        "sd1neg": 10.7,
+        "median": 12.0,
+        "sd1pos": 13.4,
+        "sd2pos": 15.0,
+        "sd3pos": 16.8
+      },
+      {
+        "ageMonths": 24,
+        "sd3neg": 8.6,
+        "sd2neg": 9.7,
+        "sd1neg": 10.8,
+        "median": 12.2,
+        "sd1pos": 13.6,
+        "sd2pos": 15.3,
+        "sd3pos": 17.1
+      },
+      {
+        "ageMonths": 25,
+        "sd3neg": 8.8,
+        "sd2neg": 9.8,
+        "sd1neg": 11.0,
+        "median": 12.4,
+        "sd1pos": 13.9,
+        "sd2pos": 15.5,
+        "sd3pos": 17.5
+      },
+      {
+        "ageMonths": 26,
+        "sd3neg": 8.9,
+        "sd2neg": 10.0,
+        "sd1neg": 11.2,
+        "median": 12.5,
+        "sd1pos": 14.1,
+        "sd2pos": 15.8,
+        "sd3pos": 17.8
+      },
+      {
+        "ageMonths": 27,
+        "sd3neg": 9.0,
+        "sd2neg": 10.1,
+        "sd1neg": 11.3,
+        "median": 12.7,
+        "sd1pos": 14.3,
+        "sd2pos": 16.1,
+        "sd3pos": 18.1
+      },
+      {
+        "ageMonths": 28,
+        "sd3neg": 9.1,
+        "sd2neg": 10.2,
+        "sd1neg": 11.5,
+        "median": 12.9,
+        "sd1pos": 14.5,
+        "sd2pos": 16.3,
+        "sd3pos": 18.4
+      },
+      {
+        "ageMonths": 29,
+        "sd3neg": 9.2,
+        "sd2neg": 10.4,
+        "sd1neg": 11.7,
+        "median": 13.1,
+        "sd1pos": 14.8,
+        "sd2pos": 16.6,
+        "sd3pos": 18.7
+      },
+      {
+        "ageMonths": 30,
+        "sd3neg": 9.4,
+        "sd2neg": 10.5,
+        "sd1neg": 11.8,
+        "median": 13.3,
+        "sd1pos": 15.0,
+        "sd2pos": 16.9,
+        "sd3pos": 19.0
+      },
+      {
+        "ageMonths": 31,
+        "sd3neg": 9.5,
+        "sd2neg": 10.7,
+        "sd1neg": 12.0,
+        "median": 13.5,
+        "sd1pos": 15.2,
+        "sd2pos": 17.1,
+        "sd3pos": 19.3
+      },
+      {
+        "ageMonths": 32,
+        "sd3neg": 9.6,
+        "sd2neg": 10.8,
+        "sd1neg": 12.1,
+        "median": 13.7,
+        "sd1pos": 15.4,
+        "sd2pos": 17.4,
+        "sd3pos": 19.6
+      },
+      {
+        "ageMonths": 33,
+        "sd3neg": 9.7,
+        "sd2neg": 10.9,
+        "sd1neg": 12.3,
+        "median": 13.8,
+        "sd1pos": 15.6,
+        "sd2pos": 17.6,
+        "sd3pos": 19.9
+      },
+      {
+        "ageMonths": 34,
+        "sd3neg": 9.8,
+        "sd2neg": 11.0,
+        "sd1neg": 12.4,
+        "median": 14.0,
+        "sd1pos": 15.8,
+        "sd2pos": 17.8,
+        "sd3pos": 20.2
+      },
+      {
+        "ageMonths": 35,
+        "sd3neg": 9.9,
+        "sd2neg": 11.2,
+        "sd1neg": 12.6,
+        "median": 14.2,
+        "sd1pos": 16.0,
+        "sd2pos": 18.1,
+        "sd3pos": 20.4
+      },
+      {
+        "ageMonths": 36,
+        "sd3neg": 10.0,
+        "sd2neg": 11.3,
+        "sd1neg": 12.7,
+        "median": 14.3,
+        "sd1pos": 16.2,
+        "sd2pos": 18.3,
+        "sd3pos": 20.7
+      },
+      {
+        "ageMonths": 37,
+        "sd3neg": 10.1,
+        "sd2neg": 11.4,
+        "sd1neg": 12.9,
+        "median": 14.5,
+        "sd1pos": 16.4,
+        "sd2pos": 18.6,
+        "sd3pos": 21.0
+      },
+      {
+        "ageMonths": 38,
+        "sd3neg": 10.2,
+        "sd2neg": 11.5,
+        "sd1neg": 13.0,
+        "median": 14.7,
+        "sd1pos": 16.6,
+        "sd2pos": 18.8,
+        "sd3pos": 21.3
+      },
+      {
+        "ageMonths": 39,
+        "sd3neg": 10.3,
+        "sd2neg": 11.6,
+        "sd1neg": 13.1,
+        "median": 14.8,
+        "sd1pos": 16.8,
+        "sd2pos": 19.0,
+        "sd3pos": 21.6
+      },
+      {
+        "ageMonths": 40,
+        "sd3neg": 10.4,
+        "sd2neg": 11.8,
+        "sd1neg": 13.3,
+        "median": 15.0,
+        "sd1pos": 17.0,
+        "sd2pos": 19.3,
+        "sd3pos": 21.9
+      },
+      {
+        "ageMonths": 41,
+        "sd3neg": 10.5,
+        "sd2neg": 11.9,
+        "sd1neg": 13.4,
+        "median": 15.2,
+        "sd1pos": 17.2,
+        "sd2pos": 19.5,
+        "sd3pos": 22.1
+      },
+      {
+        "ageMonths": 42,
+        "sd3neg": 10.6,
+        "sd2neg": 12.0,
+        "sd1neg": 13.6,
+        "median": 15.3,
+        "sd1pos": 17.4,
+        "sd2pos": 19.7,
+        "sd3pos": 22.4
+      },
+      {
+        "ageMonths": 43,
+        "sd3neg": 10.7,
+        "sd2neg": 12.1,
+        "sd1neg": 13.7,
+        "median": 15.5,
+        "sd1pos": 17.6,
+        "sd2pos": 20.0,
+        "sd3pos": 22.7
+      },
+      {
+        "ageMonths": 44,
+        "sd3neg": 10.8,
+        "sd2neg": 12.2,
+        "sd1neg": 13.8,
+        "median": 15.7,
+        "sd1pos": 17.8,
+        "sd2pos": 20.2,
+        "sd3pos": 23.0
+      },
+      {
+        "ageMonths": 45,
+        "sd3neg": 10.9,
+        "sd2neg": 12.4,
+        "sd1neg": 14.0,
+        "median": 15.8,
+        "sd1pos": 18.0,
+        "sd2pos": 20.5,
+        "sd3pos": 23.3
+      },
+      {
+        "ageMonths": 46,
+        "sd3neg": 11.0,
+        "sd2neg": 12.5,
+        "sd1neg": 14.1,
+        "median": 16.0,
+        "sd1pos": 18.2,
+        "sd2pos": 20.7,
+        "sd3pos": 23.6
+      },
+      {
+        "ageMonths": 47,
+        "sd3neg": 11.1,
+        "sd2neg": 12.6,
+        "sd1neg": 14.3,
+        "median": 16.2,
+        "sd1pos": 18.4,
+        "sd2pos": 20.9,
+        "sd3pos": 23.9
+      },
+      {
+        "ageMonths": 48,
+        "sd3neg": 11.2,
+        "sd2neg": 12.7,
+        "sd1neg": 14.4,
+        "median": 16.3,
+        "sd1pos": 18.6,
+        "sd2pos": 21.2,
+        "sd3pos": 24.2
+      },
+      {
+        "ageMonths": 49,
+        "sd3neg": 11.3,
+        "sd2neg": 12.8,
+        "sd1neg": 14.5,
+        "median": 16.5,
+        "sd1pos": 18.8,
+        "sd2pos": 21.4,
+        "sd3pos": 24.5
+      },
+      {
+        "ageMonths": 50,
+        "sd3neg": 11.4,
+        "sd2neg": 12.9,
+        "sd1neg": 14.7,
+        "median": 16.7,
+        "sd1pos": 19.0,
+        "sd2pos": 21.7,
+        "sd3pos": 24.8
+      },
+      {
+        "ageMonths": 51,
+        "sd3neg": 11.5,
+        "sd2neg": 13.1,
+        "sd1neg": 14.8,
+        "median": 16.8,
+        "sd1pos": 19.2,
+        "sd2pos": 21.9,
+        "sd3pos": 25.1
+      },
+      {
+        "ageMonths": 52,
+        "sd3neg": 11.6,
+        "sd2neg": 13.2,
+        "sd1neg": 15.0,
+        "median": 17.0,
+        "sd1pos": 19.4,
+        "sd2pos": 22.2,
+        "sd3pos": 25.4
+      },
+      {
+        "ageMonths": 53,
+        "sd3neg": 11.7,
+        "sd2neg": 13.3,
+        "sd1neg": 15.1,
+        "median": 17.2,
+        "sd1pos": 19.6,
+        "sd2pos": 22.4,
+        "sd3pos": 25.7
+      },
+      {
+        "ageMonths": 54,
+        "sd3neg": 11.8,
+        "sd2neg": 13.4,
+        "sd1neg": 15.2,
+        "median": 17.3,
+        "sd1pos": 19.8,
+        "sd2pos": 22.7,
+        "sd3pos": 26.0
+      },
+      {
+        "ageMonths": 55,
+        "sd3neg": 11.9,
+        "sd2neg": 13.5,
+        "sd1neg": 15.4,
+        "median": 17.5,
+        "sd1pos": 20.0,
+        "sd2pos": 22.9,
+        "sd3pos": 26.3
+      },
+      {
+        "ageMonths": 56,
+        "sd3neg": 12.0,
+        "sd2neg": 13.6,
+        "sd1neg": 15.5,
+        "median": 17.7,
+        "sd1pos": 20.2,
+        "sd2pos": 23.2,
+        "sd3pos": 26.6
+      },
+      {
+        "ageMonths": 57,
+        "sd3neg": 12.1,
+        "sd2neg": 13.7,
+        "sd1neg": 15.6,
+        "median": 17.8,
+        "sd1pos": 20.4,
+        "sd2pos": 23.4,
+        "sd3pos": 26.9
+      },
+      {
+        "ageMonths": 58,
+        "sd3neg": 12.2,
+        "sd2neg": 13.8,
+        "sd1neg": 15.8,
+        "median": 18.0,
+        "sd1pos": 20.6,
+        "sd2pos": 23.7,
+        "sd3pos": 27.2
+      },
+      {
+        "ageMonths": 59,
+        "sd3neg": 12.3,
+        "sd2neg": 14.0,
+        "sd1neg": 15.9,
+        "median": 18.2,
+        "sd1pos": 20.8,
+        "sd2pos": 23.9,
+        "sd3pos": 27.6
+      },
+      {
+        "ageMonths": 60,
+        "sd3neg": 12.4,
+        "sd2neg": 14.1,
+        "sd1neg": 16.0,
+        "median": 18.3,
+        "sd1pos": 21.0,
+        "sd2pos": 24.2,
+        "sd3pos": 27.9
+      }
+    ],
+    "female": [
+      {
+        "ageMonths": 0,
+        "sd3neg": 2.0,
+        "sd2neg": 2.4,
+        "sd1neg": 2.8,
+        "median": 3.2,
+        "sd1pos": 3.7,
+        "sd2pos": 4.2,
+        "sd3pos": 4.8
+      },
+      {
+        "ageMonths": 1,
+        "sd3neg": 2.7,
+        "sd2neg": 3.2,
+        "sd1neg": 3.6,
+        "median": 4.2,
+        "sd1pos": 4.8,
+        "sd2pos": 5.5,
+        "sd3pos": 6.2
+      },
+      {
+        "ageMonths": 2,
+        "sd3neg": 3.4,
+        "sd2neg": 3.9,
+        "sd1neg": 4.5,
+        "median": 5.1,
+        "sd1pos": 5.8,
+        "sd2pos": 6.6,
+        "sd3pos": 7.5
+      },
+      {
+        "ageMonths": 3,
+        "sd3neg": 4.0,
+        "sd2neg": 4.5,
+        "sd1neg": 5.2,
+        "median": 5.8,
+        "sd1pos": 6.6,
+        "sd2pos": 7.5,
+        "sd3pos": 8.5
+      },
+      {
+        "ageMonths": 4,
+        "sd3neg": 4.4,
+        "sd2neg": 5.0,
+        "sd1neg": 5.7,
+        "median": 6.4,
+        "sd1pos": 7.3,
+        "sd2pos": 8.2,
+        "sd3pos": 9.3
+      },
+      {
+        "ageMonths": 5,
+        "sd3neg": 4.8,
+        "sd2neg": 5.4,
+        "sd1neg": 6.1,
+        "median": 6.9,
+        "sd1pos": 7.8,
+        "sd2pos": 8.8,
+        "sd3pos": 10.0
+      },
+      {
+        "ageMonths": 6,
+        "sd3neg": 5.1,
+        "sd2neg": 5.7,
+        "sd1neg": 6.5,
+        "median": 7.3,
+        "sd1pos": 8.2,
+        "sd2pos": 9.3,
+        "sd3pos": 10.6
+      },
+      {
+        "ageMonths": 7,
+        "sd3neg": 5.3,
+        "sd2neg": 6.0,
+        "sd1neg": 6.8,
+        "median": 7.6,
+        "sd1pos": 8.6,
+        "sd2pos": 9.8,
+        "sd3pos": 11.1
+      },
+      {
+        "ageMonths": 8,
+        "sd3neg": 5.6,
+        "sd2neg": 6.3,
+        "sd1neg": 7.0,
+        "median": 7.9,
+        "sd1pos": 9.0,
+        "sd2pos": 10.2,
+        "sd3pos": 11.6
+      },
+      {
+        "ageMonths": 9,
+        "sd3neg": 5.8,
+        "sd2neg": 6.5,
+        "sd1neg": 7.3,
+        "median": 8.2,
+        "sd1pos": 9.3,
+        "sd2pos": 10.5,
+        "sd3pos": 12.0
+      },
+      {
+        "ageMonths": 10,
+        "sd3neg": 5.9,
+        "sd2neg": 6.7,
+        "sd1neg": 7.5,
+        "median": 8.5,
+        "sd1pos": 9.6,
+        "sd2pos": 10.9,
+        "sd3pos": 12.4
+      },
+      {
+        "ageMonths": 11,
+        "sd3neg": 6.1,
+        "sd2neg": 6.9,
+        "sd1neg": 7.7,
+        "median": 8.7,
+        "sd1pos": 9.9,
+        "sd2pos": 11.2,
+        "sd3pos": 12.8
+      },
+      {
+        "ageMonths": 12,
+        "sd3neg": 6.3,
+        "sd2neg": 7.0,
+        "sd1neg": 7.9,
+        "median": 8.9,
+        "sd1pos": 10.1,
+        "sd2pos": 11.5,
+        "sd3pos": 13.1
+      },
+      {
+        "ageMonths": 13,
+        "sd3neg": 6.4,
+        "sd2neg": 7.2,
+        "sd1neg": 8.1,
+        "median": 9.2,
+        "sd1pos": 10.4,
+        "sd2pos": 11.8,
+        "sd3pos": 13.5
+      },
+      {
+        "ageMonths": 14,
+        "sd3neg": 6.6,
+        "sd2neg": 7.4,
+        "sd1neg": 8.3,
+        "median": 9.4,
+        "sd1pos": 10.6,
+        "sd2pos": 12.1,
+        "sd3pos": 13.8
+      },
+      {
+        "ageMonths": 15,
+        "sd3neg": 6.7,
+        "sd2neg": 7.6,
+        "sd1neg": 8.5,
+        "median": 9.6,
+        "sd1pos": 10.9,
+        "sd2pos": 12.4,
+        "sd3pos": 14.1
+      },
+      {
+        "ageMonths": 16,
+        "sd3neg": 6.9,
+        "sd2neg": 7.7,
+        "sd1neg": 8.7,
+        "median": 9.8,
+        "sd1pos": 11.1,
+        "sd2pos": 12.6,
+        "sd3pos": 14.5
+      },
+      {
+        "ageMonths": 17,
+        "sd3neg": 7.0,
+        "sd2neg": 7.9,
+        "sd1neg": 8.9,
+        "median": 10.0,
+        "sd1pos": 11.4,
+        "sd2pos": 12.9,
+        "sd3pos": 14.8
+      },
+      {
+        "ageMonths": 18,
+        "sd3neg": 7.2,
+        "sd2neg": 8.1,
+        "sd1neg": 9.1,
+        "median": 10.2,
+        "sd1pos": 11.6,
+        "sd2pos": 13.2,
+        "sd3pos": 15.1
+      },
+      {
+        "ageMonths": 19,
+        "sd3neg": 7.3,
+        "sd2neg": 8.2,
+        "sd1neg": 9.2,
+        "median": 10.4,
+        "sd1pos": 11.8,
+        "sd2pos": 13.5,
+        "sd3pos": 15.4
+      },
+      {
+        "ageMonths": 20,
+        "sd3neg": 7.5,
+        "sd2neg": 8.4,
+        "sd1neg": 9.4,
+        "median": 10.6,
+        "sd1pos": 12.1,
+        "sd2pos": 13.7,
+        "sd3pos": 15.7
+      },
+      {
+        "ageMonths": 21,
+        "sd3neg": 7.6,
+        "sd2neg": 8.6,
+        "sd1neg": 9.6,
+        "median": 10.9,
+        "sd1pos": 12.3,
+        "sd2pos": 14.0,
+        "sd3pos": 16.0
+      },
+      {
+        "ageMonths": 22,
+        "sd3neg": 7.8,
+        "sd2neg": 8.7,
+        "sd1neg": 9.8,
+        "median": 11.1,
+        "sd1pos": 12.5,
+        "sd2pos": 14.3,
+        "sd3pos": 16.4
+      },
+      {
+        "ageMonths": 23,
+        "sd3neg": 7.9,
+        "sd2neg": 8.9,
+        "sd1neg": 10.0,
+        "median": 11.3,
+        "sd1pos": 12.8,
+        "sd2pos": 14.6,
+        "sd3pos": 16.7
+      },
+      {
+        "ageMonths": 24,
+        "sd3neg": 8.1,
+        "sd2neg": 9.0,
+        "sd1neg": 10.2,
+        "median": 11.5,
+        "sd1pos": 13.0,
+        "sd2pos": 14.8,
+        "sd3pos": 17.0
+      },
+      {
+        "ageMonths": 25,
+        "sd3neg": 8.2,
+        "sd2neg": 9.2,
+        "sd1neg": 10.3,
+        "median": 11.7,
+        "sd1pos": 13.3,
+        "sd2pos": 15.1,
+        "sd3pos": 17.3
+      },
+      {
+        "ageMonths": 26,
+        "sd3neg": 8.4,
+        "sd2neg": 9.4,
+        "sd1neg": 10.5,
+        "median": 11.9,
+        "sd1pos": 13.5,
+        "sd2pos": 15.4,
+        "sd3pos": 17.7
+      },
+      {
+        "ageMonths": 27,
+        "sd3neg": 8.5,
+        "sd2neg": 9.5,
+        "sd1neg": 10.7,
+        "median": 12.1,
+        "sd1pos": 13.7,
+        "sd2pos": 15.7,
+        "sd3pos": 18.0
+      },
+      {
+        "ageMonths": 28,
+        "sd3neg": 8.6,
+        "sd2neg": 9.7,
+        "sd1neg": 10.9,
+        "median": 12.3,
+        "sd1pos": 14.0,
+        "sd2pos": 16.0,
+        "sd3pos": 18.3
+      },
+      {
+        "ageMonths": 29,
+        "sd3neg": 8.8,
+        "sd2neg": 9.8,
+        "sd1neg": 11.1,
+        "median": 12.5,
+        "sd1pos": 14.2,
+        "sd2pos": 16.2,
+        "sd3pos": 18.7
+      },
+      {
+        "ageMonths": 30,
+        "sd3neg": 8.9,
+        "sd2neg": 10.0,
+        "sd1neg": 11.2,
+        "median": 12.7,
+        "sd1pos": 14.4,
+        "sd2pos": 16.5,
+        "sd3pos": 19.0
+      },
+      {
+        "ageMonths": 31,
+        "sd3neg": 9.0,
+        "sd2neg": 10.1,
+        "sd1neg": 11.4,
+        "median": 12.9,
+        "sd1pos": 14.7,
+        "sd2pos": 16.8,
+        "sd3pos": 19.3
+      },
+      {
+        "ageMonths": 32,
+        "sd3neg": 9.1,
+        "sd2neg": 10.3,
+        "sd1neg": 11.6,
+        "median": 13.1,
+        "sd1pos": 14.9,
+        "sd2pos": 17.1,
+        "sd3pos": 19.6
+      },
+      {
+        "ageMonths": 33,
+        "sd3neg": 9.3,
+        "sd2neg": 10.4,
+        "sd1neg": 11.7,
+        "median": 13.3,
+        "sd1pos": 15.1,
+        "sd2pos": 17.3,
+        "sd3pos": 20.0
+      },
+      {
+        "ageMonths": 34,
+        "sd3neg": 9.4,
+        "sd2neg": 10.5,
+        "sd1neg": 11.9,
+        "median": 13.5,
+        "sd1pos": 15.4,
+        "sd2pos": 17.6,
+        "sd3pos": 20.3
+      },
+      {
+        "ageMonths": 35,
+        "sd3neg": 9.5,
+        "sd2neg": 10.7,
+        "sd1neg": 12.0,
+        "median": 13.7,
+        "sd1pos": 15.6,
+        "sd2pos": 17.9,
+        "sd3pos": 20.6
+      },
+      {
+        "ageMonths": 36,
+        "sd3neg": 9.6,
+        "sd2neg": 10.8,
+        "sd1neg": 12.2,
+        "median": 13.9,
+        "sd1pos": 15.8,
+        "sd2pos": 18.1,
+        "sd3pos": 20.9
+      },
+      {
+        "ageMonths": 37,
+        "sd3neg": 9.7,
+        "sd2neg": 10.9,
+        "sd1neg": 12.4,
+        "median": 14.0,
+        "sd1pos": 16.0,
+        "sd2pos": 18.4,
+        "sd3pos": 21.3
+      },
+      {
+        "ageMonths": 38,
+        "sd3neg": 9.8,
+        "sd2neg": 11.1,
+        "sd1neg": 12.5,
+        "median": 14.2,
+        "sd1pos": 16.3,
+        "sd2pos": 18.7,
+        "sd3pos": 21.6
+      },
+      {
+        "ageMonths": 39,
+        "sd3neg": 9.9,
+        "sd2neg": 11.2,
+        "sd1neg": 12.7,
+        "median": 14.4,
+        "sd1pos": 16.5,
+        "sd2pos": 19.0,
+        "sd3pos": 22.0
+      },
+      {
+        "ageMonths": 40,
+        "sd3neg": 10.1,
+        "sd2neg": 11.3,
+        "sd1neg": 12.8,
+        "median": 14.6,
+        "sd1pos": 16.7,
+        "sd2pos": 19.2,
+        "sd3pos": 22.3
+      },
+      {
+        "ageMonths": 41,
+        "sd3neg": 10.2,
+        "sd2neg": 11.5,
+        "sd1neg": 13.0,
+        "median": 14.8,
+        "sd1pos": 16.9,
+        "sd2pos": 19.5,
+        "sd3pos": 22.7
+      },
+      {
+        "ageMonths": 42,
+        "sd3neg": 10.3,
+        "sd2neg": 11.6,
+        "sd1neg": 13.1,
+        "median": 15.0,
+        "sd1pos": 17.2,
+        "sd2pos": 19.8,
+        "sd3pos": 23.0
+      },
+      {
+        "ageMonths": 43,
+        "sd3neg": 10.4,
+        "sd2neg": 11.7,
+        "sd1neg": 13.3,
+        "median": 15.2,
+        "sd1pos": 17.4,
+        "sd2pos": 20.1,
+        "sd3pos": 23.4
+      },
+      {
+        "ageMonths": 44,
+        "sd3neg": 10.5,
+        "sd2neg": 11.8,
+        "sd1neg": 13.4,
+        "median": 15.3,
+        "sd1pos": 17.6,
+        "sd2pos": 20.4,
+        "sd3pos": 23.7
+      },
+      {
+        "ageMonths": 45,
+        "sd3neg": 10.6,
+        "sd2neg": 12.0,
+        "sd1neg": 13.6,
+        "median": 15.5,
+        "sd1pos": 17.8,
+        "sd2pos": 20.7,
+        "sd3pos": 24.1
+      },
+      {
+        "ageMonths": 46,
+        "sd3neg": 10.7,
+        "sd2neg": 12.1,
+        "sd1neg": 13.7,
+        "median": 15.7,
+        "sd1pos": 18.1,
+        "sd2pos": 20.9,
+        "sd3pos": 24.5
+      },
+      {
+        "ageMonths": 47,
+        "sd3neg": 10.8,
+        "sd2neg": 12.2,
+        "sd1neg": 13.9,
+        "median": 15.9,
+        "sd1pos": 18.3,
+        "sd2pos": 21.2,
+        "sd3pos": 24.8
+      },
+      {
+        "ageMonths": 48,
+        "sd3neg": 10.9,
+        "sd2neg": 12.3,
+        "sd1neg": 14.0,
+        "median": 16.1,
+        "sd1pos": 18.5,
+        "sd2pos": 21.5,
+        "sd3pos": 25.2
+      },
+      {
+        "ageMonths": 49,
+        "sd3neg": 11.0,
+        "sd2neg": 12.4,
+        "sd1neg": 14.2,
+        "median": 16.3,
+        "sd1pos": 18.8,
+        "sd2pos": 21.8,
+        "sd3pos": 25.5
+      },
+      {
+        "ageMonths": 50,
+        "sd3neg": 11.1,
+        "sd2neg": 12.6,
+        "sd1neg": 14.3,
+        "median": 16.4,
+        "sd1pos": 19.0,
+        "sd2pos": 22.1,
+        "sd3pos": 25.9
+      },
+      {
+        "ageMonths": 51,
+        "sd3neg": 11.2,
+        "sd2neg": 12.7,
+        "sd1neg": 14.5,
+        "median": 16.6,
+        "sd1pos": 19.2,
+        "sd2pos": 22.4,
+        "sd3pos": 26.3
+      },
+      {
+        "ageMonths": 52,
+        "sd3neg": 11.3,
+        "sd2neg": 12.8,
+        "sd1neg": 14.6,
+        "median": 16.8,
+        "sd1pos": 19.4,
+        "sd2pos": 22.6,
+        "sd3pos": 26.6
+      },
+      {
+        "ageMonths": 53,
+        "sd3neg": 11.4,
+        "sd2neg": 12.9,
+        "sd1neg": 14.8,
+        "median": 17.0,
+        "sd1pos": 19.7,
+        "sd2pos": 22.9,
+        "sd3pos": 27.0
+      },
+      {
+        "ageMonths": 54,
+        "sd3neg": 11.5,
+        "sd2neg": 13.0,
+        "sd1neg": 14.9,
+        "median": 17.2,
+        "sd1pos": 19.9,
+        "sd2pos": 23.2,
+        "sd3pos": 27.4
+      },
+      {
+        "ageMonths": 55,
+        "sd3neg": 11.6,
+        "sd2neg": 13.2,
+        "sd1neg": 15.1,
+        "median": 17.3,
+        "sd1pos": 20.1,
+        "sd2pos": 23.5,
+        "sd3pos": 27.7
+      },
+      {
+        "ageMonths": 56,
+        "sd3neg": 11.7,
+        "sd2neg": 13.3,
+        "sd1neg": 15.2,
+        "median": 17.5,
+        "sd1pos": 20.3,
+        "sd2pos": 23.8,
+        "sd3pos": 28.1
+      },
+      {
+        "ageMonths": 57,
+        "sd3neg": 11.8,
+        "sd2neg": 13.4,
+        "sd1neg": 15.3,
+        "median": 17.7,
+        "sd1pos": 20.6,
+        "sd2pos": 24.1,
+        "sd3pos": 28.5
+      },
+      {
+        "ageMonths": 58,
+        "sd3neg": 11.9,
+        "sd2neg": 13.5,
+        "sd1neg": 15.5,
+        "median": 17.9,
+        "sd1pos": 20.8,
+        "sd2pos": 24.4,
+        "sd3pos": 28.8
+      },
+      {
+        "ageMonths": 59,
+        "sd3neg": 12.0,
+        "sd2neg": 13.6,
+        "sd1neg": 15.6,
+        "median": 18.0,
+        "sd1pos": 21.0,
+        "sd2pos": 24.6,
+        "sd3pos": 29.2
+      },
+      {
+        "ageMonths": 60,
+        "sd3neg": 12.1,
+        "sd2neg": 13.7,
+        "sd1neg": 15.8,
+        "median": 18.2,
+        "sd1pos": 21.2,
+        "sd2pos": 24.9,
+        "sd3pos": 29.5
+      }
+    ]
+  }
+}
