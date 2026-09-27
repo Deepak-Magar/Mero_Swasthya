@@ -17,7 +17,9 @@ import 'package:mero_swasthya/features/auth/pin_screen.dart';
 import 'package:mero_swasthya/features/auth/set_pin_screen.dart';
 import 'package:mero_swasthya/features/child/child_health_screen.dart';
 import 'package:mero_swasthya/features/documents/documents_screen.dart';
-import 'package:mero_swasthya/features/family/family_screen.dart';
+import 'package:mero_swasthya/features/shell/patient_home_tab.dart';
+import 'package:mero_swasthya/features/shell/patient_more_tab.dart';
+import 'package:mero_swasthya/features/shell/provider_more_tab.dart';
 import 'package:mero_swasthya/features/family/patient_form_screen.dart';
 import 'package:mero_swasthya/features/maternal/anc_contact_screen.dart';
 import 'package:mero_swasthya/features/maternal/delivery_screen.dart';
@@ -196,7 +198,10 @@ void main() {
     screenFits('S03 OTP', () => const OtpScreen());
     screenFits('S04 PIN unlock', () => const PinScreen());
     screenFits('S05 set PIN', () => const SetPinScreen());
-    screenFits('S06 family list', () => const FamilyScreen());
+    // S06 is the shell's Home tab now: the family strip and the selected
+    // member's record on one screen.
+    screenFits('S06 home tab', () => const PatientHomeTab());
+    screenFits('patient More tab', () => const PatientMoreTab());
     screenFits('S07 patient form', () => const PatientFormScreen());
     screenFits('S08 patient home',
         () => const PatientHomeScreen(patientId: patientId));
@@ -229,7 +234,8 @@ void main() {
 
   group('provider screens', () {
     screenFits('S18 activation', () => const ProviderActivateScreen());
-    screenFits('S19 provider home', () => const ProviderHomeScreen());
+    screenFits('S19 patients tab', () => const ProviderHomeScreen());
+    screenFits('provider More tab', () => const ProviderMoreTab());
     screenFits(
       'S21 provider summary',
       () => const ProviderPatientScreen(patientId: patientId),

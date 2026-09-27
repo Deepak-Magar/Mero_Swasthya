@@ -77,7 +77,7 @@ class _ChildHealthScreenState extends ConsumerState<ChildHealthScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.childHealthTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: Column(
         children: [

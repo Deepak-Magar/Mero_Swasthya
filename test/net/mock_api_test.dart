@@ -288,6 +288,70 @@ void main() {
       );
     });
 
+    test('a code this instance never issued is adopted for the demo', () async {
+      // DEMO: mock only. Two phones each run their own MockApi, so the code
+      // the patient's phone draws is unknown to the provider's. Without this
+      // the one moment the demo exists to show dies on "Unknown QR code".
+      const foreign =
+          'SWC1:mock_grant_3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+
+      final redeemed = await api.grants.redeem(foreign);
+
+      expect(redeemed.patient.id, MockApi.sitaId);
+      expect(redeemed.patient.allergies, contains('sulpha'));
+      expect(redeemed.grant.accessUntil, isNotNull);
+      expect(
+        DateTime.parse(redeemed.grant.accessUntil!)
+            .difference(now.toUtc())
+            .inHours,
+        24,
+      );
+      expect(redeemed.pregnancy, isNotNull);
+      expect(redeemed.ancContacts, hasLength(8));
+      expect(redeemed.timeline, isNotEmpty);
+
+      final audit = await api.patients.audit(MockApi.sitaId);
+      expect(
+        audit.map((a) => a.action),
+        contains(AuditAction.grantRedeemed),
+      );
+    });
+
+    test('an adopted code is still one-shot and still expires', () async {
+      const foreign =
+          'SWC1:mock_grant_9b2c1d44-1111-4222-8333-444455556666';
+      await api.grants.redeem(foreign);
+
+      // Adopted or not, it is a grant now: the ten-minute window applies.
+      now = now.add(const Duration(minutes: 11));
+      await expectLater(
+        api.grants.redeem(foreign),
+        throwsA(
+          isA<AppError>().having((e) => e.code, 'code', AppError.grantExpired),
+        ),
+      );
+    });
+
+    test('leniency does not extend to payloads that are not grant codes',
+        () async {
+      for (final bad in [
+        'HELLO',
+        'SWC1:HELLO',
+        'SWC1:mock_grant_not-a-uuid',
+        // The right shape, but without the prefix it is not a Swasthya code.
+        'mock_grant_3f2504e0-4f89-41d3-9a0c-0305e82c3301',
+        'SWC1:mock_grant_3f2504e0-4f89-41d3-9a0c-0305e82c33',
+      ]) {
+        await expectLater(
+          api.grants.redeem(bad),
+          throwsA(
+            isA<AppError>().having((e) => e.code, 'code', 'NOT_FOUND'),
+          ),
+          reason: bad,
+        );
+      }
+    });
+
     test('an unknown QR is a 404 rather than a crash', () async {
       await expectLater(
         api.grants.redeem('SWC1:not_a_real_token'),

@@ -12,11 +12,17 @@ import '../../domain/rules/anc_schedule.dart';
 import '../../domain/rules/edd.dart';
 import '../../domain/rules/epi_schedule.dart';
 import '../../shared/widgets/soft_card.dart';
-import '../export/export_pdf_button.dart';
 import '../shared/widgets/app_widgets.dart';
+import '../shell/shell_scaffold.dart';
 import 'share_sheet.dart';
 
-/// S08 — Patient home: the card, and the QR that shares it.
+/// S08 — one family member's record: the card, and the QR that shares it.
+///
+/// Two ways in, one body. The Home tab of the patient shell shows it for
+/// whichever member the avatar strip has selected; `/patient/:id` shows it for
+/// one named member with a back arrow, which is what a deep link and the
+/// provider-side links need. Both render [PatientRecordBody], so the record
+/// cannot look like two different screens depending on how it was reached.
 class PatientHomeScreen extends ConsumerWidget {
   const PatientHomeScreen({super.key, required this.patientId});
 
@@ -31,10 +37,13 @@ class PatientHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(patient.valueOrNull?.name ?? l10n.commonLoading),
         actions: [
-          const SyncChip(),
+          const SyncPill.compact(),
+          // Labelled through its tooltip *and* duplicated as "Edit details" in
+          // the More tab. The audit's finding was that a lone pencil is the
+          // only way to correct a name; it is now the shortcut, not the path.
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            tooltip: l10n.commonEdit,
+            tooltip: l10n.moreEditDetails,
             onPressed: () => context.push('/family/$patientId/edit'),
           ),
         ],
@@ -48,15 +57,20 @@ class PatientHomeScreen extends ConsumerWidget {
               title: l10n.errorNotFound,
             );
           }
-          return _Body(patient: value);
+          return PatientRecordBody(patient: value);
         },
       ),
     );
   }
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({required this.patient});
+/// The record itself: identity, the one primary action, the tile grid, and the
+/// pregnancy card when there is one.
+///
+/// Scrollable and unpadded at the top so it can sit under the family strip on
+/// the Home tab or directly under an app bar on `/patient/:id`.
+class PatientRecordBody extends ConsumerWidget {
+  const PatientRecordBody({super.key, required this.patient});
 
   final Patient patient;
 
@@ -81,11 +95,13 @@ class _Body extends ConsumerWidget {
             const <Immunisation>[];
     final overdue = isChild ? overdueDoses(schedule).length : 0;
 
-    // The third tile is whichever of the maternal / child journeys this person
-    // is actually on. Everyone has a timeline, documents and reminders; only
-    // one of these four ever applies at a time, so they share a slot instead of
-    // each claiming a permanent row nobody needs.
-    final (thirdIcon, thirdLabel, thirdRoute) = switch (patient) {
+    // The fourth tile is whichever of the maternal / child journeys this person
+    // is actually on. It is the same rule as before the UX pass, with the one
+    // thing the audit found wrong about it fixed: whatever loses the slot is
+    // now a labelled row in the More tab rather than unreachable. In
+    // particular a woman whose pregnancy has been delivered can register the
+    // next one from More, which she could not before.
+    final (fourthIcon, fourthLabel, fourthRoute) = switch (patient) {
       _ when isActive => (
           Icons.pregnant_woman_outlined,
           l10n.pregnancyDashboardTitle,
@@ -102,7 +118,7 @@ class _Body extends ConsumerWidget {
           '/patient/${patient.id}/pregnancy/new',
         ),
       // An adult man on no maternal or child pathway. Rather than leave a hole
-      // in the row, the slot falls back to the audit list, which is the one
+      // in the grid, the slot falls back to the audit list, which is the one
       // remaining thing every patient has.
       _ => (
           Icons.visibility_outlined,
@@ -110,6 +126,18 @@ class _Body extends ConsumerWidget {
           '/patient/${patient.id}/audit',
         ),
     };
+
+    // A tile for a screen that is also a tab switches to it instead of pushing
+    // a second copy. Outside the shell — `/patient/:id`, a widget test — there
+    // is no tab to switch to, so it pushes the route as it always did.
+    final shell = ShellScope.maybeOf(context);
+    void openTab(int index, String route) {
+      if (shell == null) {
+        context.push(route);
+      } else {
+        shell.select(index);
+      }
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -122,9 +150,9 @@ class _Body extends ConsumerWidget {
         _HeaderCluster(patient: patient),
         const SizedBox(height: AppSpacing.xl),
 
-        // Exactly one primary button on the screen. Everything else is a tile,
-        // a card or a line in the More sheet — so "show this to the health
-        // worker" is never one of five equally loud choices.
+        // Exactly one primary button on the screen, and it is on Home rather
+        // than one level down: "show this to the health worker" is the whole
+        // product, and it is now the first thing a patient can reach.
         FilledButton.icon(
           onPressed: () => showShareSheet(context, patient.id),
           icon: const Icon(Icons.qr_code_2_rounded, size: 26),
@@ -141,13 +169,21 @@ class _Body extends ConsumerWidget {
         ),
 
         const SizedBox(height: AppSpacing.lg),
+        // 2 x 2, not 1 x 4.
+        //
+        // Four tiles across a 360 dp phone left about 78 dp each, and the
+        // audit's sixth finding was the result: Devanagari labels shrank to a
+        // fragment and the row read as four unlabelled icons. Half as many per
+        // row is twice the width for the word, which is what makes the tile a
+        // labelled control rather than a glyph.
         Row(
           children: [
             Expanded(
               child: SoftTile(
                 icon: Icons.history_rounded,
                 label: l10n.patientHomeTimeline,
-                onTap: () => context.push('/patient/${patient.id}/timeline'),
+                onTap: () =>
+                    openTab(1, '/patient/${patient.id}/timeline'),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -155,15 +191,20 @@ class _Body extends ConsumerWidget {
               child: SoftTile(
                 icon: Icons.folder_outlined,
                 label: l10n.patientHomeDocuments,
-                onTap: () => context.push('/patient/${patient.id}/documents'),
+                onTap: () =>
+                    openTab(2, '/patient/${patient.id}/documents'),
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
             Expanded(
               child: SoftTile(
-                icon: thirdIcon,
-                label: thirdLabel,
-                onTap: () => context.push(thirdRoute),
+                icon: fourthIcon,
+                label: fourthLabel,
+                onTap: () => context.push(fourthRoute),
                 badge: overdue > 0 ? _CountBadge(count: overdue) : null,
               ),
             ),
@@ -186,113 +227,7 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           _DeliveredCard(pregnancy: pregnancy),
         ],
-
-        const SizedBox(height: AppSpacing.xl),
-        // Printable card, audit and PDF export all live one tap down. Each is
-        // used once in a while — when somebody loses a phone, when a referral
-        // hospital wants paper — and none of them earns a permanent row on the
-        // screen a family opens every week.
-        Center(
-          child: TextButton.icon(
-            onPressed: () => _showMoreSheet(context, patient),
-            icon: const Icon(Icons.more_horiz_rounded, size: 20),
-            label: Text(l10n.commonMore),
-          ),
-        ),
       ],
-    );
-  }
-
-  void _showMoreSheet(BuildContext context, Patient patient) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        final l10n = L.of(sheetContext);
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.gutter,
-              AppSpacing.sm,
-              AppSpacing.gutter,
-              AppSpacing.xl,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionHeader(l10n.commonMore),
-                _SheetRow(
-                  icon: Icons.visibility_outlined,
-                  label: l10n.patientHomeWhoViewed,
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    context.push('/patient/${patient.id}/audit');
-                  },
-                ),
-                // Spec A.7. The ten-minute QR needs a charged phone with a
-                // signal at the moment somebody asks; this one needs neither.
-                _SheetRow(
-                  icon: Icons.badge_outlined,
-                  label: l10n.printedCardAction,
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    context.push('/patient/${patient.id}/card');
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                // Tier 3. The record belongs to the patient, so it has to be
-                // able to leave the app: a printed sheet works in a referral
-                // hospital with no network, no account and no copy of this
-                // software.
-                ExportPdfButton(patient: patient),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// A row in the S08 More sheet: outlined glyph, label, chevron.
-class _SheetRow extends StatelessWidget {
-  const _SheetRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 22, color: AppColors.textSecondaryOf(context)),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textSecondaryOf(context),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

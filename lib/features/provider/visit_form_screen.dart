@@ -127,7 +127,7 @@ class _VisitFormScreenState extends ConsumerState<VisitFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.visitTitle),
-        actions: const [SyncChip(), SizedBox(width: AppSpacing.sm)],
+        actions: const [SyncPill.compact(), SizedBox(width: AppSpacing.sm)],
       ),
       // Sticky, because this form is seven sections long and a provider with a
       // patient in front of them should never have to scroll to finish.
@@ -147,6 +147,7 @@ class _VisitFormScreenState extends ConsumerState<VisitFormScreen> {
           // --- Complaint -----------------------------------------------
           FormSection(
             title: l10n.visitChiefComplaint,
+            helper: l10n.visitChiefComplaintHelper,
             children: [
               PicklistField<CodeListItem>(
                 label: l10n.visitChiefComplaint,
@@ -179,6 +180,7 @@ class _VisitFormScreenState extends ConsumerState<VisitFormScreen> {
           // column of full-width rows does.
           FormSection(
             title: l10n.visitVitals,
+            helper: l10n.visitVitalsHelper,
             children: [
               StepperGrid(
                 children: [
@@ -247,6 +249,7 @@ class _VisitFormScreenState extends ConsumerState<VisitFormScreen> {
           // --- Diagnoses ------------------------------------------------
           FormSection(
             title: l10n.visitDiagnoses,
+            helper: l10n.visitDiagnosesHelper,
             children: [
               PicklistField<CodeListItem>(
                 label: l10n.visitDiagnoses,
@@ -274,6 +277,7 @@ class _VisitFormScreenState extends ConsumerState<VisitFormScreen> {
           // --- Advice ----------------------------------------------------
           FormSection(
             title: l10n.visitAdvice,
+            helper: l10n.visitAdviceHelper,
             children: [
               TextField(
                 controller: _advice,
@@ -392,7 +396,10 @@ class _PrescriptionSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionHeader(l10n.visitMedicines),
+          SectionHeader(
+            l10n.visitMedicines,
+            helper: l10n.visitMedicinesHelper,
+          ),
           // Each medicine is its own card rather than a row in a shared one:
           // they are added and removed one at a time, and a card that can be
           // deleted should look like a discrete object.

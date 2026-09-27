@@ -13,7 +13,7 @@ import 'package:mero_swasthya/data/sync/connectivity.dart';
 import 'package:mero_swasthya/domain/models/enums.dart';
 import 'package:mero_swasthya/domain/models/models.dart';
 import 'package:mero_swasthya/domain/rules/delivery_complications.dart';
-import 'package:mero_swasthya/features/family/family_screen.dart';
+import 'package:mero_swasthya/features/family/family_widgets.dart';
 import 'package:mero_swasthya/features/maternal/pregnancy_dashboard_screen.dart';
 import 'package:mero_swasthya/features/patient_home/patient_home_screen.dart';
 

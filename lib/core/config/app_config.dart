@@ -11,6 +11,7 @@ class AppConfig {
   static const String _useMockKey = 'use_mock_server';
   static const String _mockRoleKey = 'mock_activated_role';
   static const String _mockNameKey = 'mock_user_name';
+  static const String _offlineShareKey = 'offline_share_mode';
 
   /// Spec §5 default targets the emulator loopback.
   static const String defaultBaseUrl =
@@ -91,6 +92,44 @@ class AppConfig {
 
   Future<void> setShareSections(String patientId, List<String> sections) =>
       _prefs.setStringList('share_sections:$patientId', sections);
+
+  /// Which QR the share sheet draws: the server-issued grant (`SWC1`) or the
+  /// self-contained offline snapshot (`SWC2`).
+  ///
+  /// Per device, not per patient — it is a property of where this phone is
+  /// standing, not of whose record is open. Null means "never chosen", and the
+  /// sheet then follows whether the mock is serving.
+  bool? get offlineShareMode {
+    if (!_prefs.containsKey(_offlineShareKey)) return null;
+    return _prefs.getBool(_offlineShareKey);
+  }
+
+  Future<void> setOfflineShareMode({required bool value}) =>
+      _prefs.setBool(_offlineShareKey, value);
+
+  // -------------------------------------------------------------------------
+  // First-run coach marks
+  // -------------------------------------------------------------------------
+  //
+  // One boolean per tour, not a "seen the onboarding" flag: the patient tour
+  // and the provider tour are shown at different times to the same person on a
+  // dual-role phone, and a single flag would eat whichever came second.
+  //
+  // A preference rather than a table row, because it describes this handset
+  // rather than the record — a reinstall should explain the app again.
+
+  static const String _coachPrefix = 'coach_seen:';
+
+  bool coachSeen(String tour) =>
+      _prefs.getBool('$_coachPrefix$tour') ?? false;
+
+  Future<void> setCoachSeen(String tour) =>
+      _prefs.setBool('$_coachPrefix$tour', true);
+
+  /// Used by the tests, and by nothing in the app: there is no "show me the
+  /// tour again" button, because a first run only happens once.
+  Future<void> clearCoachSeen(String tour) =>
+      _prefs.remove('$_coachPrefix$tour');
 
   /// null = follow the device locale (spec §13: device locale if ne/en, else ne).
   String? get localeCode => _prefs.getString(_localeKey);

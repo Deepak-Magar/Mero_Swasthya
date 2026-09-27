@@ -53,6 +53,10 @@ class AppTheme {
   /// Spec §16: minimum tap target 48 dp.
   static const double minTapTarget = 48;
 
+  /// The height the bottom navigation bar is themed to, named so the shell can
+  /// keep its coach-mark overlay clear of it rather than guessing.
+  static const double navBarHeight = 68;
+
   static ThemeData light() => _build(Brightness.light);
   static ThemeData dark() => _build(Brightness.dark);
 
@@ -288,7 +292,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         indicatorColor: brandTint,
         elevation: 0,
-        height: 68,
+        height: AppTheme.navBarHeight,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(

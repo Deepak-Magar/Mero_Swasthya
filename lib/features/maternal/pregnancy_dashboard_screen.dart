@@ -28,7 +28,7 @@ class PregnancyDashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.pregnancyDashboardTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: Column(
         children: [

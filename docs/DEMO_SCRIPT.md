@@ -16,6 +16,32 @@ against the in-app mock: no backend, no SIM, no second phone required.
 | Health-post caseload (Tier 2) | Gita Tharu (week 10), Maya B.K. (week 37), Parbati Chaudhary (week 22, one contact missed, amber) |
 | Child (Tier 3) | Aarav Chaudhary, 3 years, 16 of 18 doses given, **2 overdue** (MR dose 2, TCV), three weights |
 
+**Where things are (the navigation changed — see `UX_AUDIT.md`)**
+
+Both roles are now bottom tabs, labelled with words, not icons. Nothing is
+behind a `⋮` any more.
+
+| Role | Tabs | What used to be where |
+|---|---|---|
+| Patient | **Home** · **Records** · **Documents** · **More** | Home is the family strip *and* the open record on one screen; Records is the timeline; More holds Who viewed my record, Printable card, Export PDF, Reminders, Child health, Register pregnancy, Edit details, "I am a health worker", Sync and **Settings (language)** |
+| Health worker | **Scan** · **Patients** · **More** | Scan is the landing tab, so the camera is up the moment the app opens; Patients is the old recent-patients list; More holds the Health post dashboard, Sync, My family and Settings |
+
+Two things the demo now leans on:
+
+* **Switching family member never leaves the record.** Tap a face in the strip
+  along the top of Home and the card underneath changes. There is no separate
+  family list screen any more.
+* **The sync pill says the time in words.** Under the app bar on Home and on
+  Patients: *"Synced 2 min ago"*, *"3 changes waiting"*, *"Offline"*. Tap it for
+  the Sync screen. The old cloud glyph in other app bars now carries a word too.
+
+**First run shows three coach marks** on the patient side ("This is your
+family", "Share your record with a QR", "Everything else is under More") and two
+on the provider side ("Health workers scan here", "Everyone you scanned today").
+They are shown once per install. **Decide before you start** whether you want
+them: after `pm clear` they will appear, and they are a good thirty seconds of
+story — or tap **Skip** and carry on.
+
 ---
 
 ## Pre-demo checklist
@@ -38,23 +64,28 @@ Do all of this **before** the audience is watching. It takes about five minutes.
 - [ ] **Airplane-mode test.** Toggle it on, add a visit, watch the pending cloud
       icon, toggle it off, watch the chip go green. If this does not work,
       something is wrong with the build — find out now, not on stage.
-- [ ] **Nepali locale.** Open Settings and flip to नेपाली once, then back to
-      English. Confirms the language toggle and warms the font cache.
+- [ ] **Nepali locale.** **More → Settings** (it is a named row now, subtitled
+      "Language" — no longer behind a `⋮`) and flip to नेपाली once, then back to
+      English. Confirms the language toggle, warms the font cache, and shows you
+      where the tab bar's Nepali labels sit.
+- [ ] **Walk the four patient tabs and the three provider tabs once** so you
+      know which is where before the room is watching. Press Android back on a
+      non-Home tab and watch it return to Home rather than leaving the app.
 - [ ] **Laptop QR image ready.** Open the patient's QR full-screen on the laptop
       in advance if you plan to use the laptop-screen fallback (below). White
       background, brightness up.
 
 ### If you are showing the Tier 2 segment, also:
 
-- [ ] **Grant notifications and fire one for real.** Settings → **Test a
-      medicine reminder** → Allow. A reminder appears about thirty seconds
+- [ ] **Grant notifications and fire one for real.** **More → Settings** →
+      **Test a medicine reminder** → Allow. A reminder appears about thirty seconds
       later. This is the only way to find out whether *this* phone will show
       one, and finding out on stage is too late. (`POST_NOTIFICATIONS` is an
       Android 13+ runtime permission; you can pre-grant it with
       `adb shell pm grant com.meroswasthya.app android.permission.POST_NOTIFICATIONS`,
       but do the live test anyway.)
-- [ ] **Check for a Nepali TTS voice.** Open a visit's medicine row and tap the
-      **speaker** icon. If you see *"No Nepali voice on this phone — read in
+- [ ] **Check for a Nepali TTS voice.** **Records** tab → a visit → its
+      medicine row → the **speaker** icon. If you see *"No Nepali voice on this phone — read in
       English"*, install one: Settings → Additional settings → Language & input
       → Text-to-speech → install the Nepali voice data. The app does not crash
       without it, but the Nepali line is half the point.
@@ -66,13 +97,15 @@ Do all of this **before** the audience is watching. It takes about five minutes.
 ### If you are showing the Tier 3 segment, also:
 
 - [ ] **Check for a Nepali speech recogniser.** Open any ANC contact, scroll to
-      **Notes**, and look for the microphone. If it is missing, this phone has
+      **Notes** — it now carries a line telling the worker to tap the microphone
+      to dictate in Nepali — and look for the microphone. If it is missing, this phone has
       no recogniser at all and the voice beat is off. If it is there, tap it
       once: *"No Nepali dictation on this phone — using English"* means you
       will get English words back. Install the Nepali voice from Settings →
       Additional settings → Language & input → Google Voice Typing → Offline
       speech recognition.
-- [ ] **Confirm the PDF font is in the build.** Tap **Export PDF** on Ram once.
+- [ ] **Confirm the PDF font is in the build.** Select Ram in the family strip,
+      then **More → Export PDF**, once.
       If the sheet appears with a `.pdf` filename, the Devanagari font is
       bundled and the document built. (If the font were missing the export
       would fail outright with "Could not build the PDF" — it cannot fail
@@ -105,14 +138,21 @@ hospital. It works with no signal. Let me show you from a brand-new phone."*
 3. **S05 — create PIN.** Name `Sita Chaudhary`, PIN `1234` twice.
    **Say:** *"The PIN unlocks the record every day, offline. The database never
    leaves the phone unless the patient shares it."*
-4. **S06 — My family.** Ram and Sita appear, already carrying history, with the
-   sync chip green.
-   **Say:** *"One phone can hold the whole family. This is a first sync — the
-   record came down from the server complete."*
-   Point at Sita's **"Pregnant · week 30"** chip.
-5. **Tap Sita → S08.** Point at the red **⚠ sulpha** chip.
+4. **Home.** The app lands on the **Home** tab: Ram and Sita as faces in the
+   strip across the top, one of them already open underneath, and the sync pill
+   reading **"Synced just now"**.
+   *(If the coach marks appear, use them: three cards, tap through or Skip.)*
+   **Say:** *"One phone holds the whole family, and the record is the home
+   screen — not a list you have to get past. This is a first sync; the record
+   came down from the server complete, and the phone says so in words."*
+5. **Tap Sita's face in the strip.** Her card opens in place — no navigation.
+   Point at the red **⚠ sulpha** chip, then at **"Share record (QR)"**, the one
+   blue button on the screen.
    **Say:** *"Allergies are always at the top, in red. A health worker should
-   never have to go looking for that."*
+   never have to go looking for that. And the one thing this app is for —
+   handing your record to a health worker — is the only primary button on the
+   screen."*
+   Point at her **"Pregnant · week 30"** card below the tiles.
 6. **Tap the pregnancy card → S12.**
    **Say:** *"Eight antenatal contacts on the national schedule. Three are done,
    contact four is due today — and the dates are Bikram Sambat, because that is
@@ -120,36 +160,56 @@ hospital. It works with no signal. Let me show you from a brand-new phone."*
 
 ### Part 2 — the health worker (about 60 seconds)
 
-7. **Back to S06 → the badge icon → S18.** Type `HA-GHORAHI-01` → Activate.
-   **Say:** *"The same app becomes the health worker's app with an invite code.
-   She keeps her own family record on the same phone."*
-   Land on **S19 — Ghorahi Health Post**.
-8. **The QR.** Go to My family → Sita → **Share record (QR)**.
+7. **More → "I am a health worker" → S18.** Type `HA-GHORAHI-01` → Activate.
+   **Say:** *"The same app becomes the health worker's app with an invite code —
+   and it is a row that says so, not a three-dot menu. She keeps her own family
+   record on the same phone."*
+   Land on the provider shell, **Scan** tab, camera already up, under
+   **Ghorahi Health Post**.
+   *(Two provider coach marks appear on a first run — tap through or Skip.)*
+8. **The QR.** **More → My family** → Sita in the strip →
+   **Share record (QR)**.
    **Say:** *"The patient shows this. It is a ten-minute, single-use grant — the
    patient is handing over access, deliberately, and it expires by itself."*
-   Point at the countdown.
-9. **Scan it.** S19 → **Scan patient QR** → hold the phone over the QR.
+   Point at the countdown. *(The sheet itself is unchanged: both QR modes, the
+   countdown, the revoke button and the section chips all work exactly as they
+   did.)*
+9. **Scan it.** **More → Health worker mode** → the **Scan** tab is already the
+   camera. Hold the phone over the QR.
+   **Say:** *"No taps. The app opens on the scanner, because that is why the
+   phone came out of the pocket."*
    - *One phone:* put the QR on a laptop screen and scan that (see fallbacks).
    - *If the camera will not bite:* tap **"Enter code instead"**, paste or type
      the `SWC1:…` payload, **Open record**. Same code path, same validation.
 10. **S21 — the summary.**
-    **Say:** *"Ten seconds to everything that matters: allergies in red, the
-    active pregnancy, last vitals."*
+    **Say:** *"Ten seconds to everything that matters: allergies pinned in red,
+    the active pregnancy, last vitals."*
+    Point at the bottom bar: a labelled **"More actions"** row — Capture paper,
+    Register pregnancy, Timeline — over the two buttons she presses all day,
+    **ANC contact 4** and **Add visit**.
+    **Say:** *"The two things she does most are always in the same place, and
+    the rest are named rather than hidden under a dot menu. On a long record she
+    used to have to scroll past the medicines to find the antenatal contact."*
 11. **Add a visit (S22).** Pick a complaint and a diagnosis from the picklists.
+    Point at the short grey line under each block heading.
+    **Say:** *"Every block says what it is for, because the first person to use
+    this will be learning it with a patient in front of them."*
     **Say:** *"Sixty seconds, all taps, no typing — because this has to work
     faster than the paper register it replaces."*
 
 ### Part 3 — the point (about 20 seconds)
 
 12. **Before saving, turn on airplane mode** (or have it on already).
-    Save the visit. The row shows the **pending cloud** icon.
-    **Say:** *"No signal. The visit is saved on the phone and queued."*
-13. **Turn airplane mode off.** Within a few seconds the chip goes green and the
-    icon clears.
+    Save the visit. The row shows the **pending cloud** icon, and the pill on the
+    **Patients** tab reads **"1 change waiting"**.
+    **Say:** *"No signal. The visit is saved on the phone and queued — and the
+    phone tells her so in a sentence, not a coloured dot."*
+13. **Turn airplane mode off.** Within a few seconds the pill reads
+    **"Synced just now"** and the pending icon clears.
     **Say:** *"Signal comes back and it syncs itself. The health worker never
     thinks about it."*
-14. **Open Sita's timeline (S09).** The new visit is there, grouped under its
-    Bikram Sambat month.
+14. **More → My family → Sita → the Records tab.** The new visit is there,
+    grouped under its Bikram Sambat month.
     **Say:** *"And it is in the patient's record, on the patient's phone, in the
     patient's calendar."*
 
@@ -174,26 +234,31 @@ which needs a second phone.
 **Say:** *"Four things we added once the core worked. Each one is about the
 person who is not holding the phone."*
 
-1. **Printed card + PIN (about 20 s).** My family → Sita → **Printable card**.
+1. **Printed card + PIN (about 20 s).** Sita in the family strip →
+   **More → Printable card** (two taps; it used to be three, behind a "More"
+   text button at the bottom of a scroll).
    A year-long read-only QR with her name, date of birth in both calendars,
    blood group, and — in Nepali and English — *"Ask the patient for their
    4-digit PIN"*. Tap **Share / save image**: it is a PNG, so it goes to a print
    shop.
-   Now redeem it: S19 → **Scan patient QR** → *Enter code instead* → the card's
-   payload → **Open record**. The app asks for **the patient's PIN**. Type a
+   Now redeem it: **More → Health worker mode** → the **Scan** tab →
+   *Enter code instead* → the card's payload → **Open record**. The app asks for **the patient's PIN**. Type a
    wrong one first — *"That PIN was not accepted"* — then `1234`.
-   S21 opens under a **"Read-only access"** banner with **no Add visit and no
-   Register pregnancy**.
+   S21 opens under a **"Read-only access"** banner with **no Add visit, no ANC
+   contact and no Register pregnancy** — only **Timeline** is left in the
+   "More actions" row, so the record can still be read.
    **Say:** *"A card on a wall is not a credential. The paper gets you as far as
    the door; the patient's four digits get you in, and only to read."*
 
 2. **Delivery (about 10 s).** Sita's pregnancy → **Record delivery** → place,
-   mode, outcome, baby weight and sex, complication chips → Save. The dashboard
-   button is replaced by a green **Delivered** card, and back on My family her
-   badge has changed from *Pregnant · week 30* to **Delivered**.
+   mode, outcome, baby weight and sex, complication chips → Save. The pregnancy
+   card is replaced by a green **Delivered** card. Then show
+   **More → Register pregnancy**, which is still listed.
+   **Say:** *"And the next pregnancy is still one row away. Before this pass a
+   delivered pregnancy took 'Register pregnancy' off her phone entirely."*
 
-3. **AI draft summary (about 15 s).** Ram → Documents → **Bharatpur Hospital
-   discharge sheet** → **Draft summary (AI)**. It reads *"Reading the
+3. **AI draft summary (about 15 s).** Ram in the family strip → the
+   **Documents** tab → **Bharatpur Hospital discharge sheet** → **Draft summary (AI)**. It reads *"Reading the
    document…"*, then a bilingual summary appears **under an amber
    "AI-generated, unverified — confirm with a health worker" label in both
    languages**, listing two medicines and their doses.
@@ -208,16 +273,16 @@ person who is not holding the phone."*
    **Say:** *"The map is a convenience. Knowing which birthing centre is
    nineteen kilometres away is not, so that part works with the radio off."*
 
-5. **Medicine reminder (about 5 s).** Ram's timeline → the visit → the medicine
-   row. Tap the **speaker** to hear the drug and the Nepali instruction read
+5. **Medicine reminder (about 5 s).** Ram → the **Records** tab → the visit →
+   the medicine row. Tap the **speaker** to hear the drug and the Nepali instruction read
    aloud; tap **Set reminders** and it confirms *"13 reminders set for the next
    7 days"* — 08:00 and 20:00 for a BD prescription, with the Nepali instruction
    in the notification body.
    **Say:** *"Most people who are handed four tablets a day cannot read the
    label. So the phone says it, and then keeps saying it."*
 
-**Optional close:** *"Health post dashboard"* — the chart icon on S19 counts the
-caseload cached on this phone: pregnancies by trimester, who has been missed,
+**Optional close:** *"Health post dashboard"* — provider **More → Health post
+dashboard** counts the caseload cached on this phone: pregnancies by trimester, who has been missed,
 who was flagged red or amber this week, deliveries this month. Every tile opens
 the list of women behind it. It is computed locally, so it works in a building
 with no connection — which is where the question usually gets asked.
@@ -232,8 +297,10 @@ beats and each one answers a different objection.
 **Say:** *"Four things on the roadmap, all built, none of them requiring a
 government API we do not have."*
 
-1. **Child health (about 20 s).** My family → **Aarav Chaudhary**, 3 years →
-   the **Child health** card, which already reads **"Overdue: 2"** in red.
+1. **Child health (about 20 s).** **Aarav Chaudhary**, 3 years, in the family
+   strip → the **Child health** tile in the 2×2 grid, which already carries a
+   red **2** badge. *(It is also a named row in **More**, for whenever the
+   contextual tile is showing something else.)*
    Open it: the national EPI schedule, one row per dose, green for given, a red
    outline for the two he has missed — **Measles-Rubella dose 2** and
    **Typhoid conjugate**, both due at 15 months. Dates in Bikram Sambat.
@@ -256,8 +323,8 @@ government API we do not have."*
    a child's first birthday, in both directions."*
    *(If asked: 18 doses, 7 visits — birth, 6, 10, 14 weeks, 9, 12, 15 months.)*
 
-2. **Consent, section by section (about 15 s).** My family → Sita → **Share
-   record (QR)**. Above the QR there is now a **"What to share"** row. Tap
+2. **Consent, section by section (about 15 s).** Sita in the family strip →
+   **Share record (QR)** on Home (one tap now, not two). Above the QR there is now a **"What to share"** row. Tap
    **Pregnancy** — the QR regenerates, because the token carries the consent.
    Redeem it on the provider side. S21 opens with a line at the top reading
    **"Patient shared: Pregnancy"**, the pregnancy card is there, and the
@@ -275,15 +342,16 @@ government API we do not have."*
    **Say:** *"Dictated, then read back before it is saved. Nothing reaches a
    medical record that the person who said it has not had a chance to correct."*
 
-4. **PDF (about 15 s).** Back to Ram → **Export PDF** → the share sheet appears
-   with a real file. Open it in a PDF viewer if one is handy.
+4. **PDF (about 15 s).** Ram in the strip → **More → Export PDF** → the share
+   sheet appears with a real file. Open it in a PDF viewer if one is handy.
    **Say:** *"The record belongs to the patient, so it has to be able to leave
    the app. Allergies boxed in red at the top, medicines with the Nepali
    instruction, the immunisation card if it is a child, dates in both
    calendars. That sheet works in a referral hospital with no network, no
    account and no copy of this software."*
 
-**Optional close — the honest slide.** Settings → scroll to **Integrations**.
+**Optional close — the honest slide.** **More → Settings** → scroll to
+**Integrations**.
 Three rows: National ID verification, HMIS/DHIS2 export, Provider council
 verification. Each says **"Not connected — requires government API access"**,
 explains in both languages what it would do and what the app does instead, and
@@ -298,14 +366,16 @@ than a fake green tick."*
 
 1. **Camera on a laptop screen.** Open the QR PNG full-screen, brightness up.
    Works, but a glossy screen and a phone's autofocus can fight each other.
-2. **"Enter code instead" on S20.** The link sits under the camera preview. It
+2. **"Enter code instead" on the Scan tab.** The link sits under the camera
+   preview, exactly where it always did. It
    accepts the whole `SWC1:…` payload and goes through exactly the same redeem
    path — same prefix check, same rejection toast. This is the reliable one.
    To get the payload without a camera:
    `adb exec-out screencap -p > s.png` and decode it, or read it off the share
    sheet.
-3. **Skip the scan.** The provider's "Recent patients" list on S19 keeps anyone
-   already redeemed, so a scan done before the demo still opens S21 in one tap.
+3. **Skip the scan.** The provider's **Patients** tab keeps anyone already
+   redeemed for 24 hours, so a scan done before the demo still opens S21 in two
+   taps — Patients, then the card.
 
 ## Known risk
 

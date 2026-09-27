@@ -11,8 +11,17 @@ import '../../shared/widgets/soft_card.dart';
 import '../../shared/widgets/brand_logo.dart';
 import '../auth/auth_controller.dart';
 import '../shared/widgets/app_widgets.dart';
+import '../shell/shell_scaffold.dart';
 
-/// S19 — Provider home: scan, and the patients whose grants are still open.
+/// S19 — the provider shell's Patients tab: everyone whose grant is still open.
+///
+/// The scan tile that used to sit at the top of this screen is gone, because
+/// scanning is now the shell's first tab — a health worker with a patient at the
+/// door reaches the camera with no taps at all rather than one. What is left is
+/// what this screen was always for: coming back to somebody already scanned.
+///
+/// The unlabeled `⋮` that used to hold "My family" and "Settings" is gone too;
+/// both are named rows in the More tab.
 class ProviderHomeScreen extends ConsumerWidget {
   const ProviderHomeScreen({super.key});
 
@@ -21,6 +30,8 @@ class ProviderHomeScreen extends ConsumerWidget {
     final l10n = L.of(context);
     final auth = ref.watch(authProvider);
     final granted = ref.watch(grantedPatientsProvider);
+
+    Future<void> refresh() => ref.read(syncEngineProvider).run();
 
     return Scaffold(
       appBar: AppBar(
@@ -31,168 +42,89 @@ class ProviderHomeScreen extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        actions: [
-          const SyncChip(),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: l10n.commonMore,
-            position: PopupMenuPosition.under,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            ),
-            onSelected: (value) => switch (value) {
-              'family' => context.go('/family'),
-              _ => context.push('/settings'),
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'family',
-                child: _MenuRow(
-                  icon: Icons.family_restroom_outlined,
-                  label: l10n.providerMyFamily,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'settings',
-                child: _MenuRow(
-                  icon: Icons.settings_outlined,
-                  label: l10n.settingsTitle,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
+        // The full pill sits under the bar on this tab; see PatientHomeTab.
+        actions: const [SizedBox(width: AppSpacing.sm)],
       ),
       body: Column(
         children: [
           const OfflineBanner(),
+          // The full sync pill: a health worker who has been out of signal all
+          // morning needs "3 changes waiting" in words, not an amber glyph.
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              AppSpacing.sm,
+              AppSpacing.gutter,
+              AppSpacing.sm,
+            ),
+            child: SyncPill(),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.gutter,
-              AppSpacing.lg,
+              AppSpacing.sm,
               AppSpacing.gutter,
               0,
             ),
-            child: Column(
-              children: [
-                // The whole reason the phone is out of the pocket. It is a
-                // tile rather than a button: at 96 dp of brand blue it is the
-                // first thing the eye lands on and can be hit without looking.
-                _ScanTile(onTap: () => context.push('/provider/scan')),
-                const SizedBox(height: AppSpacing.md),
-                // Tier 2. Below the scan tile because it is a once-a-day read,
-                // not the thing being done with a patient at the door.
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/provider/dashboard'),
-                  icon: const Icon(Icons.insights_outlined, size: 18),
-                  label: Text(l10n.dashboardAction),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(l10n.providerRecentPatients),
-              ],
-            ),
+            child: SectionHeader(l10n.providerRecentPatients),
           ),
           Expanded(
             child: asyncView(
               granted,
+              onRetry: refresh,
               data: (patients) {
                 if (patients.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.qr_code_scanner_rounded,
-                    title: l10n.providerNoRecentPatients,
+                  return RefreshIndicator(
+                    onRefresh: refresh,
+                    child: ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height * 0.55,
+                          child: EmptyState(
+                            icon: Icons.qr_code_scanner_rounded,
+                            title: l10n.providerNoRecentPatients,
+                            body: l10n.providerNoRecentPatientsBody,
+                            action: FilledButton.icon(
+                              // Switches to the Scan tab rather than pushing a
+                              // second scanner over this one. Outside the shell
+                              // — a widget test — there is no tab, so it pushes.
+                              onPressed: () {
+                                final shell = ShellScope.maybeOf(context);
+                                if (shell == null) {
+                                  context.push('/provider/scan');
+                                } else {
+                                  shell.select(0);
+                                }
+                              },
+                              icon: const Icon(Icons.qr_code_scanner_rounded),
+                              label: Text(l10n.providerScanQr),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.gutter,
-                    0,
-                    AppSpacing.gutter,
-                    40,
+                return RefreshIndicator(
+                  onRefresh: refresh,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.gutter,
+                      0,
+                      AppSpacing.gutter,
+                      40,
+                    ),
+                    itemCount: patients.length,
+                    itemBuilder: (context, index) =>
+                        _GrantedTile(patient: patients[index]),
                   ),
-                  itemCount: patients.length,
-                  itemBuilder: (context, index) =>
-                      _GrantedTile(patient: patients[index]),
                 );
               },
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// S19's primary action.
-class _ScanTile extends StatelessWidget {
-  const _ScanTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = L.of(context);
-
-    return Semantics(
-      button: true,
-      label: l10n.providerScanQr,
-      child: Material(
-        color: AppColors.brandOf(context),
-        borderRadius: BorderRadius.circular(AppSpacing.radius),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.radius),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xl,
-              vertical: AppSpacing.xl,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.qr_code_scanner_rounded,
-                  size: 36,
-                  color: AppColors.onBrandOf(context),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Text(
-                    l10n.providerScanQr,
-                    style: TextStyle(
-                      color: AppColors.onBrandOf(context),
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// One row inside the app-bar overflow menu.
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.textSecondaryOf(context)),
-        const SizedBox(width: AppSpacing.md),
-        Flexible(
-          child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        ),
-      ],
     );
   }
 }

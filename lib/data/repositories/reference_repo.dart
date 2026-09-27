@@ -47,6 +47,24 @@ class ReferenceRepo {
   Stream<List<AuditEntry>> watchAudit(String patientId) =>
       db.cacheDao.watchAudit(patientId);
 
+  /// Record that a record was opened from an offline snapshot.
+  ///
+  /// Written locally because there is no server in this flow at all — that is
+  /// the whole point of it. It merges with whatever the server sends later,
+  /// since the audit table is append-only and keyed by id.
+  Future<void> recordOfflineSnapshot(String patientId, {DateTime? at}) {
+    final when = (at ?? DateTime.now().toUtc()).toIso8601String();
+    return db.cacheDao.upsertAudit([
+      AuditEntry(
+        id: 'offline:$patientId:$when',
+        patientId: patientId,
+        actorUserId: '',
+        action: AuditAction.offlineSnapshot,
+        at: when,
+      ),
+    ]);
+  }
+
   Future<bool> refreshAudit(String patientId) async {
     try {
       // Append-only on the server, so this merges rather than replaces and an

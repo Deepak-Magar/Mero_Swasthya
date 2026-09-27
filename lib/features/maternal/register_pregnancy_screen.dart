@@ -221,12 +221,13 @@ class _RegisterPregnancyScreenState
             ),
 
             _SchedulePreview(edd: edd, rules: loaded),
-            FilledButton(
-              onPressed: _busy ? null : _register,
-              child: Text(l10n.pregnancyRegister),
-            ),
           ],
         ),
+      ),
+      bottomNavigationBar: StickySaveBar(
+        label: l10n.pregnancyRegister,
+        busy: _busy,
+        onPressed: _register,
       ),
     );
   }

@@ -12,7 +12,6 @@ import 'features/auth/set_pin_screen.dart';
 import 'features/audit/audit_screen.dart';
 import 'features/child/child_health_screen.dart';
 import 'features/documents/documents_screen.dart';
-import 'features/family/family_screen.dart';
 import 'features/facilities/facility_map_screen.dart';
 import 'features/family/patient_form_screen.dart';
 import 'features/maternal/anc_contact_screen.dart';
@@ -23,12 +22,13 @@ import 'features/patient_home/patient_home_screen.dart';
 import 'features/patient_home/printed_card_screen.dart';
 import 'features/provider/provider_activate_screen.dart';
 import 'features/provider/provider_dashboard_screen.dart';
-import 'features/provider/provider_home_screen.dart';
 import 'features/provider/provider_patient_screen.dart';
 import 'features/provider/scan_screen.dart';
 import 'features/provider/visit_form_screen.dart';
 import 'features/reminders/reminders_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/shell/patient_shell.dart';
+import 'features/shell/provider_shell.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/sync/sync_screen.dart';
 import 'features/timeline/timeline_screen.dart';
@@ -85,7 +85,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth/set-pin', builder: (_, _) => const SetPinScreen()),
 
       // --- Family: S06, S07 ------------------------------------------------
-      GoRoute(path: '/family', builder: (_, _) => const FamilyScreen()),
+      // S06 is now the patient shell's Home tab rather than a screen of its
+      // own: the four patient tabs all hang off this one route, and the member
+      // they act on comes from `selectedMemberProvider` rather than a path
+      // segment. The path is unchanged so every `context.go('/family')` and the
+      // auth redirect in `authRedirect` keep working.
+      GoRoute(path: '/family', builder: (_, _) => const PatientShell()),
       GoRoute(
         path: '/family/new',
         builder: (_, _) => const PatientFormScreen(),
@@ -158,7 +163,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // --- Provider: S18–S22 -----------------------------------------------
-      GoRoute(path: '/provider', builder: (_, _) => const ProviderHomeScreen()),
+      // Likewise S19: the three provider tabs hang off '/provider', and Scan
+      // is the landing tab.
+      GoRoute(path: '/provider', builder: (_, _) => const ProviderShell()),
       GoRoute(
         path: '/provider/activate',
         builder: (_, _) => const ProviderActivateScreen(),

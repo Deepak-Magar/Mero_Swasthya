@@ -27,24 +27,36 @@ class ProviderDashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.dashboardTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: Column(
         children: [
           const OfflineBanner(),
           Expanded(
-            child: asyncView(
+            // The counts are computed from the cached bundles, so a pull is a
+            // sync: it is how a health worker who has just come back into signal
+            // makes the dashboard agree with the server.
+            child: RefreshIndicator(
+              onRefresh: () => ref.read(syncEngineProvider).run(),
+              child: asyncView(
               dashboard,
               data: (value) {
                 if (value.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.insights_outlined,
-                    title: l10n.dashboardEmpty,
-                    action: FilledButton.icon(
-                      onPressed: () => context.push('/provider/scan'),
-                      icon: const Icon(Icons.qr_code_scanner_rounded),
-                      label: Text(l10n.providerScanQr),
-                    ),
+                  return ListView(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.55,
+                        child: EmptyState(
+                          icon: Icons.insights_outlined,
+                          title: l10n.dashboardEmpty,
+                          action: FilledButton.icon(
+                            onPressed: () => context.push('/provider/scan'),
+                            icon: const Icon(Icons.qr_code_scanner_rounded),
+                            label: Text(l10n.providerScanQr),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }
 
@@ -93,6 +105,7 @@ class ProviderDashboardScreen extends ConsumerWidget {
                   ],
                 );
               },
+              ),
             ),
           ),
         ],
@@ -157,7 +170,7 @@ class DashboardBucketScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(bucketLabel(l10n, bucket)),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: asyncView(
         dashboard,

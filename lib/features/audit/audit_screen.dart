@@ -40,22 +40,30 @@ class _AuditScreenState extends ConsumerState<AuditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.auditTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
-      body: asyncView(
+      body: RefreshIndicator(
+        onRefresh: () async =>
+            ref.read(referenceRepoProvider).refreshAudit(widget.patientId),
+        child: asyncView(
         entries,
         data: (list) {
           if (list.isEmpty) {
-            return EmptyState(
-              icon: Icons.visibility_off_outlined,
-              title: l10n.auditEmpty,
+            return ListView(
+              children: [
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.6,
+                  child: EmptyState(
+                    icon: Icons.visibility_off_outlined,
+                    title: l10n.auditEmpty,
+                    body: l10n.auditEmptyBody,
+                  ),
+                ),
+              ],
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: () async =>
-                ref.read(referenceRepoProvider).refreshAudit(widget.patientId),
-            child: ListView.builder(
+          return ListView.builder(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.gutter,
                 AppSpacing.md,
@@ -64,9 +72,9 @@ class _AuditScreenState extends ConsumerState<AuditScreen> {
               ),
               itemCount: list.length,
               itemBuilder: (context, index) => _AuditTile(entry: list[index]),
-            ),
           );
         },
+        ),
       ),
     );
   }
@@ -111,6 +119,10 @@ class _AuditTile extends StatelessWidget {
       AuditAction.grantRevoked => (
           Icons.block_outlined,
           l10n.auditActionGrantRevoked,
+        ),
+      AuditAction.offlineSnapshot => (
+          Icons.cloud_off_outlined,
+          l10n.auditActionOfflineSnapshot,
         ),
     };
 

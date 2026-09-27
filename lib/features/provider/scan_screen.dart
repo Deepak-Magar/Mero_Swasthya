@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/l10n/gen/app_localizations.dart';
+import '../../core/share/offline_snapshot.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/remote/api/api.dart';
@@ -46,7 +47,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     // hand the first one over so it is rejected with the same message.
     await _redeem(
       values.firstWhere(
-        (value) => value.startsWith(GrantsApi.qrPrefix),
+        (value) =>
+            value.startsWith(GrantsApi.qrPrefix) ||
+            value.startsWith(OfflineSnapshot.prefix),
         orElse: () => values.first,
       ),
     );
@@ -64,6 +67,12 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   /// what will happen against a real server that signs its own tokens.
   Future<void> _redeem(String payload, {String? pin}) async {
     if (_handling && pin == null) return;
+
+    // A self-contained code needs no server at all: the record is inside it.
+    if (payload.startsWith(OfflineSnapshot.prefix)) {
+      await _openOfflineSnapshot(payload);
+      return;
+    }
 
     if (!payload.startsWith(GrantsApi.qrPrefix)) {
       // Spec S20: reject foreign QR codes instantly rather than sending them
@@ -119,7 +128,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       }
 
       if (!mounted) return;
-      context.pushReplacement('/provider/patient/${result.patient.id}');
+      await _openRedeemed(result.patient.id);
     } on Object catch (error) {
       if (!mounted) return;
 
@@ -129,6 +138,94 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         return;
       }
 
+      setState(() => _handling = false);
+      await _controller.start();
+      if (mounted) showErrorSnackBar(context, error);
+    }
+  }
+
+  /// Open an SWC2 snapshot: decode it here, cache it, show S21.
+  ///
+  /// The shape of this mirrors the grant redeem above on purpose — same cache
+  /// writes, same 24-hour window, same destination — so a record that arrived
+  /// offline behaves like any other from the moment it lands. What differs is
+  /// where it came from, and S21 says so in a banner.
+  Future<void> _openOfflineSnapshot(String payload) async {
+    // Read before the first await: the controller stop below is an async gap,
+    // and this context may be gone on the far side of it.
+    final l10n = L.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() => _handling = true);
+    await _controller.stop();
+
+    OfflineSnapshot snapshot;
+    try {
+      snapshot = decodeOfflineSnapshot(payload);
+    } on Object {
+      setState(() => _handling = false);
+      await _controller.start();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.providerScanInvalid)),
+      );
+      return;
+    }
+
+    // Ten minutes, checked on the reader as well as the writer. Nothing is
+    // stored for an expired code: a record the patient did not mean to share
+    // any more must not be left sitting on this phone.
+    if (snapshot.isExpired(DateTime.now().toUtc())) {
+      setState(() => _handling = false);
+      await _controller.start();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.providerOfflineExpired)),
+      );
+      return;
+    }
+
+    try {
+      final rules = ref.read(rulesProvider).valueOrNull;
+      final bundle = bundleFromSnapshot(
+        snapshot,
+        scheduleWeeks: rules == null
+            ? OfflineSnapshot.defaultScheduleWeeks
+            : [for (final c in rules.ancSchedule) c.weekTarget],
+      );
+
+      final db = ref.read(databaseProvider);
+      final until = DateTime.now()
+          .toUtc()
+          .add(const Duration(hours: 24))
+          .toIso8601String();
+
+      await ref.read(patientRepoProvider).cacheGranted(bundle.patient, until);
+
+      // A snapshot is a full-access hand-over, the same as a scanned grant:
+      // the patient held their phone out. It is not the printed card.
+      await db.syncMetaDao.setReadOnlyAccess(bundle.patient.id, value: false);
+      await db.syncMetaDao.setGrantSections(bundle.patient.id, const []);
+
+      // Where this record came from, and when. S21 draws a banner from it, and
+      // it is what stops an offline summary being mistaken for a synced one.
+      await db.syncMetaDao.setOfflineSnapshotAt(
+        bundle.patient.id,
+        snapshot.generatedAt.toIso8601String(),
+      );
+
+      final pregnancy = bundle.pregnancy;
+      if (pregnancy != null) {
+        await db.pregnanciesDao.upsertPregnancy(pregnancy);
+        await db.pregnanciesDao.upsertContacts(bundle.ancContacts);
+      }
+
+      await ref
+          .read(referenceRepoProvider)
+          .recordOfflineSnapshot(bundle.patient.id);
+
+      if (!mounted) return;
+      await _openRedeemed(bundle.patient.id);
+    } on Object catch (error) {
+      if (!mounted) return;
       setState(() => _handling = false);
       await _controller.start();
       if (mounted) showErrorSnackBar(context, error);
@@ -173,6 +270,23 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }
   }
 
+  /// Show the record this scan produced, then come back ready for the next one.
+  ///
+  /// `push`, not `pushReplacement`. The scanner is the provider shell's landing
+  /// tab now rather than a screen pushed on top of a list, so replacing it would
+  /// tear the tab out from under itself. Pushing means back from the summary
+  /// lands on a live camera, which is also what a health worker seeing patients
+  /// one after another wants.
+  ///
+  /// Nothing about the redeem, the decode or the caching above changes — this is
+  /// the navigation verb and the camera restart, and that is all.
+  Future<void> _openRedeemed(String patientId) async {
+    await context.push('/provider/patient/$patientId');
+    if (!mounted) return;
+    setState(() => _handling = false);
+    await _controller.start();
+  }
+
   Future<void> _enterCodeManually() async {
     final code = await showDialog<String>(
       context: context,
@@ -208,7 +322,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           IconButton(
             icon: const Icon(Icons.flashlight_on_outlined),
             color: AppColors.onBrand,
-            tooltip: 'Torch',
+            tooltip: l10n.scanTorch,
             onPressed: _controller.toggleTorch,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -387,7 +501,10 @@ class _ManualCodeDialogState extends State<ManualCodeDialog> {
   void _submit() {
     final payload = _code.text.trim();
 
-    if (!payload.startsWith(GrantsApi.qrPrefix)) {
+    // Both formats: the demo fallback has to be able to type whatever the
+    // camera would have read, and offline codes are the longer of the two.
+    if (!payload.startsWith(GrantsApi.qrPrefix) &&
+        !payload.startsWith(OfflineSnapshot.prefix)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(L.of(context).providerScanInvalid)),
       );

@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mero Swasthya (mock data)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "args": ["--dart-define=MOCK_API=true"]
+    },
+    {
+      "name": "Mero Swasthya (mock, release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "args": ["--dart-define=MOCK_API=true"]
+    }
+  ]
+}

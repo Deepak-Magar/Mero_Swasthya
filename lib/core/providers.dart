@@ -249,6 +249,18 @@ final patientProvider = StreamProvider.family<Patient?, String>((ref, id) {
   return ref.watch(patientRepoProvider).watchById(id);
 });
 
+/// Which family member the patient-side Home tab is showing.
+///
+/// Session state, not a preference: it is "who am I looking at right now",
+/// which the avatar strip sets and the four tabs all read. Null means "not
+/// chosen yet", and Home then falls back to the first member — otherwise a
+/// fresh install would open on an empty record with a full family behind it.
+///
+/// It lives here rather than inside the shell because the Records, Documents
+/// and More tabs need the same answer and must not be able to disagree with
+/// Home about it.
+final selectedMemberProvider = StateProvider<String?>((ref) => null);
+
 /// Spec §9: "GET /patients/:id, fallback: computed locally from visits".
 ///
 /// The fallback is the point — S08 and S21 must render a usable summary from
@@ -330,6 +342,16 @@ final pregnancyBundleProvider =
 ///
 /// Set by the redeem in S20 from the grant's scope, and true for A.7's printed
 /// card. A patient's own record is never read-only, so an absent key is false.
+/// When this device's copy of [patientId] came off a patient's phone as an
+/// offline snapshot, or null when it arrived the ordinary way.
+final offlineSnapshotAtProvider =
+    StreamProvider.family<DateTime?, String>((ref, patientId) {
+  return ref
+      .watch(databaseProvider)
+      .syncMetaDao
+      .watchOfflineSnapshotAt(patientId);
+});
+
 final readOnlyAccessProvider =
     StreamProvider.family<bool, String>((ref, patientId) {
   return ref.watch(databaseProvider).syncMetaDao.watchReadOnlyAccess(patientId);

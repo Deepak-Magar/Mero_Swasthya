@@ -58,15 +58,42 @@ class TimelineScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.timelineTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
-      body: asyncView(
+      body: RefreshIndicator(
+        // Outside `asyncView`, so the gesture works in the empty and error
+        // states too — which is exactly when somebody pulls down.
+        onRefresh: () => ref.read(syncEngineProvider).run(),
+        child: asyncView(
         items,
         data: (list) {
           if (list.isEmpty) {
-            return EmptyState(
-              icon: Icons.history_rounded,
-              title: l10n.timelineEmpty,
+            // A record that arrived as an offline snapshot carries the summary
+            // and nothing else, so its timeline is empty *by construction*.
+            // Saying "no history yet" there would be a lie: there is a history,
+            // it just did not fit in a QR code.
+            final offline =
+                ref.watch(offlineSnapshotAtProvider(patientId)).valueOrNull;
+            return ListView(
+              children: [
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.6,
+                  child: EmptyState(
+                    icon: offline == null
+                        ? Icons.history_rounded
+                        : Icons.cloud_off_outlined,
+                    title: offline == null
+                        ? l10n.timelineEmpty
+                        : l10n.timelineOfflineOnly,
+                    // Spec §16 wants a one-line explanation, not just a
+                    // headline: "Nothing recorded yet" does not tell a
+                    // first-time family that a health worker has to record
+                    // something first. The offline-snapshot case already says
+                    // why it is empty, so it is left alone.
+                    body: offline == null ? l10n.timelineEmptyBody : null,
+                  ),
+                ),
+              ],
             );
           }
 
@@ -100,6 +127,7 @@ class TimelineScreen extends ConsumerWidget {
             },
           );
         },
+        ),
       ),
     );
   }

@@ -391,7 +391,13 @@ enum AuditAction {
   @JsonValue('document_added')
   documentAdded,
   @JsonValue('grant_revoked')
-  grantRevoked;
+  grantRevoked,
+
+  /// A record that arrived as an offline SWC2 snapshot rather than through a
+  /// server-issued grant. Worth its own row: the patient's own audit trail
+  /// should say which of the two happened.
+  @JsonValue('offline_snapshot')
+  offlineSnapshot;
 
   String get wire => switch (this) {
         AuditAction.grantCreated => 'grant_created',
@@ -401,6 +407,7 @@ enum AuditAction {
         AuditAction.contactRecorded => 'contact_recorded',
         AuditAction.documentAdded => 'document_added',
         AuditAction.grantRevoked => 'grant_revoked',
+        AuditAction.offlineSnapshot => 'offline_snapshot',
       };
 }
 

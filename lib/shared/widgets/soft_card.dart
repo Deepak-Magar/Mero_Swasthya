@@ -130,27 +130,54 @@ class SectionHeader extends StatelessWidget {
     this.label, {
     super.key,
     this.trailing,
+    this.helper,
     this.padding = const EdgeInsets.only(bottom: AppSpacing.md),
   });
 
   final String label;
   final Widget? trailing;
+
+  /// One sentence under the label saying what the block is for.
+  ///
+  /// Added for the forms a health worker meets for the first time with a
+  /// patient in front of them: a tracked all-caps word names a block, but
+  /// "FINDINGS" does not say that an empty box is not a normal result. Left
+  /// null everywhere the heading is already self-explanatory — a helper line on
+  /// every section is noise, and noise is what makes people stop reading the
+  /// ones that matter.
+  final String? helper;
+
   final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.labelSmall;
+    final text = Theme.of(context).textTheme;
     return Padding(
       padding: padding,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Text(
-              label.toUpperCase(),
-              style: style,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: text.labelSmall,
+                ),
+              ),
+              ?trailing,
+            ],
           ),
-          ?trailing,
+          if (helper != null) ...[
+            const SizedBox(height: AppSpacing.tight),
+            Text(
+              helper!,
+              style: text.bodySmall?.copyWith(
+                color: AppColors.textSecondaryOf(context),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -449,8 +476,12 @@ class FormSection extends StatelessWidget {
     this.title,
     required this.children,
     this.trailing,
+    this.helper,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
   });
+
+  /// Passed through to [SectionHeader.helper]. Ignored when [title] is null,
+  /// because a helper line with nothing to explain is a floating sentence.
 
   /// Null renders the card with no heading.
   ///
@@ -458,6 +489,8 @@ class FormSection extends StatelessWidget {
   /// what the screen is, and "FULL NAME" over a card holding a name, a sex, a
   /// date of birth and a blood group labels one field and mis-labels four.
   final String? title;
+  final String? helper;
+
   final List<Widget> children;
   final Widget? trailing;
   final EdgeInsetsGeometry padding;
@@ -469,7 +502,8 @@ class FormSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null) SectionHeader(title!, trailing: trailing),
+          if (title != null)
+            SectionHeader(title!, trailing: trailing, helper: helper),
           SoftCard(
             padding: padding,
             child: Column(

@@ -75,7 +75,7 @@ class _FacilityMapScreenState extends ConsumerState<FacilityMapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.facilityMapTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: Column(
         children: [

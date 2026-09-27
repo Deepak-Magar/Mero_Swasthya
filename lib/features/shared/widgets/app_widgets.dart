@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +16,7 @@ import '../../../domain/models/enums.dart';
 import '../../../domain/rules/triage.dart';
 import '../../../shared/widgets/soft_card.dart';
 
-/// The shared widgets spec §4 lists: `BsDateText`, `TriageBanner`, `SyncChip`,
+/// The shared widgets spec §4 lists: `BsDateText`, `TriageBanner`, `SyncPill`,
 /// `PicklistField`, `NumberStepper`, `OfflineBanner`.
 
 // ---------------------------------------------------------------------------
@@ -171,16 +171,45 @@ class TriageDot extends StatelessWidget {
 
 /// Spec S17: "grey = offline, amber = N pending, green = synced."
 ///
-/// A small tinted pill in the app bar rather than a bare icon. The state of the
-/// record is the one piece of chrome that earns a word next to its glyph: a
-/// health worker halfway up a hill needs to know at a glance whether what they
-/// just wrote has left the phone, and a cloud outline on its own does not say
-/// that.
+/// A labelled, tappable pill that opens S17 — never a bare glyph. "Is what I
+/// just wrote off this phone yet" is the question an offline-first app is asked
+/// most often, and a cloud outline does not answer it. So the pill always
+/// carries words, and in its full form it says *when*: "Synced 2 min ago",
+/// "3 changes waiting", "Offline".
 ///
-/// The count is the label when something is waiting; otherwise the pill carries
-/// only its icon, so a synced phone shows the quietest possible chrome.
-class SyncChip extends ConsumerWidget {
-  const SyncChip({super.key});
+/// Two forms, because an app bar and a home screen have different room:
+///
+///  * [SyncPill.compact] — icon plus the state in one or two words. This is
+///    what sits in `AppBar.actions`, where the title has to keep most of the
+///    width and a Devanagari sentence would push the row off the edge.
+///  * [SyncPill] — the full sentence with the relative time, used as a
+///    full-width row on the two home tabs, where the question is actually
+///    asked and there is room to answer it properly.
+///
+/// Both go to `/sync` and both are at least 48 dp tall.
+class SyncPill extends ConsumerWidget {
+  const SyncPill({super.key}) : compact = false;
+
+  /// The app-bar form: icon plus the short state word.
+  const SyncPill.compact({super.key}) : compact = true;
+
+  final bool compact;
+
+  /// "Synced 2 min ago" / "Not synced yet" — the green state's own words.
+  ///
+  /// Deliberately coarse. Nobody needs the second, and a clock that counts up
+  /// in the app bar is a reason to look at the app bar.
+  static String syncedLabel(L l10n, String? lastSyncAt, DateTime now) {
+    final at = lastSyncAt == null ? null : DateTime.tryParse(lastSyncAt);
+    if (at == null) return l10n.syncNeverYet;
+
+    final elapsed = now.difference(at.toUtc().toLocal());
+    // A clock that has drifted backwards must not print "synced in 3 minutes".
+    if (elapsed.isNegative || elapsed.inMinutes < 1) return l10n.syncJustNow;
+    if (elapsed.inMinutes < 60) return l10n.syncMinutesAgo(elapsed.inMinutes);
+    if (elapsed.inHours < 24) return l10n.syncHoursAgo(elapsed.inHours);
+    return l10n.syncDaysAgo(elapsed.inDays);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,35 +217,40 @@ class SyncChip extends ConsumerWidget {
     final status =
         ref.watch(syncStatusProvider).valueOrNull ?? const SyncStatus();
 
-    final (icon, colour, tint, label, short) = switch (status.chip) {
+    final (icon, colour, tint) = switch (status.chip) {
       SyncChipState.offline => (
           Icons.cloud_off_outlined,
-          AppColors.textSecondary,
+          AppColors.textSecondaryOf(context),
           AppColors.skeleton,
-          l10n.commonOffline,
-          null,
         ),
       SyncChipState.failed => (
           Icons.error_outline,
           TriageColors.red,
           TriageColors.redBg,
-          l10n.syncFailed,
-          null,
         ),
       SyncChipState.pending => (
           Icons.cloud_upload_outlined,
           TriageColors.amber,
           TriageColors.amberBg,
-          l10n.syncPendingOps(status.pending),
-          '${status.pending}',
         ),
       SyncChipState.synced => (
           Icons.cloud_done_outlined,
           AppColors.brandGreen,
           AppColors.brandGreenTint,
-          l10n.syncSynced,
-          null,
         ),
+    };
+
+    final label = switch (status.chip) {
+      SyncChipState.offline => l10n.commonOffline,
+      SyncChipState.failed => l10n.syncFailed,
+      // The count is the message either way; the wording differs only in how
+      // much room there is to say it.
+      SyncChipState.pending => compact
+          ? l10n.syncPendingOps(status.pending)
+          : l10n.syncChangesWaiting(status.pending),
+      SyncChipState.synced => compact
+          ? l10n.syncSynced
+          : syncedLabel(l10n, status.lastSyncAt, DateTime.now()),
     };
 
     final glyph = status.running
@@ -227,47 +261,50 @@ class SyncChip extends ConsumerWidget {
           )
         : Icon(icon, size: 16, color: colour);
 
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        button: true,
-        label: label,
-        child: InkWell(
-          onTap: () => context.push('/sync'),
-          borderRadius: BorderRadius.circular(999),
-          // Spec §16's 48 dp minimum: the pill itself is 28 dp tall, so the tap
-          // target is the padding around it, not the pill.
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: () => context.push('/sync'),
+        borderRadius: BorderRadius.circular(compact ? 999 : AppSpacing.radiusSm),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: AppTheme.minTapTarget),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 0),
+          alignment: Alignment.center,
           child: Container(
-            constraints: const BoxConstraints(minHeight: AppTheme.minTapTarget),
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            alignment: Alignment.center,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: short == null ? 8 : 10,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: tint,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  glyph,
-                  if (short != null) ...[
-                    const SizedBox(width: 5),
-                    Text(
-                      short,
-                      style: TextStyle(
-                        color: colour,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
+            width: compact ? null : double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 7,
+            ),
+            decoration: BoxDecoration(
+              color: tint,
+              borderRadius:
+                  BorderRadius.circular(compact ? 999 : AppSpacing.radiusSm),
+            ),
+            child: Row(
+              mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+              children: [
+                glyph,
+                const SizedBox(width: 6),
+                // Flexible in the compact form so a long Nepali state word
+                // shortens rather than pushing the app-bar row off the screen.
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colour,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+                if (!compact)
+                  Icon(Icons.chevron_right_rounded, size: 18, color: colour),
+              ],
             ),
           ),
         ),
@@ -275,6 +312,7 @@ class SyncChip extends ConsumerWidget {
     );
   }
 }
+
 
 /// Spec §16: a persistent thin banner on provider screens while offline.
 class OfflineBanner extends ConsumerWidget {

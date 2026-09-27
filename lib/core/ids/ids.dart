@@ -20,6 +20,14 @@ String newId() => _uuid.v4();
 String ancContactId(String pregnancyId, int contactNo) =>
     _uuid.v5(ancContactNamespace, '$pregnancyId:$contactNo');
 
+/// Deterministic id for the pregnancy rebuilt from an offline SWC2 snapshot.
+///
+/// The snapshot carries the patient's id but not the pregnancy's, and the
+/// provider's phone has to land on the same row every time the same person is
+/// scanned — otherwise a second scan grows a second pregnancy.
+String offlinePregnancyId(String patientId) =>
+    _uuid.v5(ancContactNamespace, '$patientId:offline-pregnancy');
+
 /// Deterministic Immunisation id (Tier 3, same rule as A.8.15).
 ///
 ///   id = uuidv5(ns, patientId + ":" + vaccineCode + ":" + doseNo)

@@ -40,20 +40,30 @@ class DocumentsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.documentsTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
-      body: asyncView(
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(syncEngineProvider).run(),
+        child: asyncView(
         documents,
         data: (list) {
           if (list.isEmpty) {
-            return EmptyState(
-              icon: Icons.photo_library_outlined,
-              title: l10n.documentsEmpty,
-              action: FilledButton.icon(
-                onPressed: () => _capture(context, ref, patientId),
-                icon: const Icon(Icons.camera_alt_outlined),
-                label: Text(l10n.documentsCapture),
-              ),
+            return ListView(
+              children: [
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.6,
+                  child: EmptyState(
+                    icon: Icons.photo_library_outlined,
+                    title: l10n.documentsEmpty,
+                    body: l10n.documentsEmptyBody,
+                    action: FilledButton.icon(
+                      onPressed: () => _capture(context, ref, patientId),
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      label: Text(l10n.documentsCapture),
+                    ),
+                  ),
+                ),
+              ],
             );
           }
 
@@ -75,6 +85,7 @@ class DocumentsScreen extends ConsumerWidget {
                 _DocumentTile(row: list[index]),
           );
         },
+        ),
       ),
       // The empty state already carries "Capture paper" as its primary action,
       // and two identical primary buttons on one screen is one too many. The

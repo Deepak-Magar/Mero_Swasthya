@@ -40,7 +40,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.remindersTitle),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: Column(
         children: [
@@ -76,21 +76,32 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               ),
             ),
           Expanded(
-            child: asyncView(
+            // The RefreshIndicator used to live inside the `data` branch, below
+            // the empty check, so the pull did nothing on an empty list — the
+            // one state in which a user reaches for it.
+            child: RefreshIndicator(
+              onRefresh: () async => ref
+                  .read(referenceRepoProvider)
+                  .refreshReminders(widget.patientId),
+              child: asyncView(
               reminders,
               data: (list) {
                 if (list.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.notifications_none,
-                    title: l10n.remindersEmpty,
+                  return ListView(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.55,
+                        child: EmptyState(
+                          icon: Icons.notifications_none,
+                          title: l10n.remindersEmpty,
+                          body: l10n.remindersEmptyBody,
+                        ),
+                      ),
+                    ],
                   );
                 }
 
-                return RefreshIndicator(
-                  onRefresh: () async => ref
-                      .read(referenceRepoProvider)
-                      .refreshReminders(widget.patientId),
-                  child: ListView.builder(
+                return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.gutter,
                       AppSpacing.md,
@@ -102,9 +113,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       reminder: list[index],
                       nepali: nepali,
                     ),
-                  ),
                 );
               },
+              ),
             ),
           ),
         ],

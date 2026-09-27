@@ -284,3 +284,35 @@ growth module, fine-grained consent on QR grants, Nepali voice notes, PDF export
 and honest integration placeholders are all built and verified on a physical
 phone. 533 tests, analyzer clean, **Part A unchanged** — every addition is a new
 table, a new optional field or a new enum value an older client skips.
+
+---
+
+## UX and discoverability pass — done, device verification outstanding
+
+Authority: `docs/UX_AUDIT.md`. A behaviour-neutral pass over the information
+architecture, done after Tier 3 and after the restyle (`UI_RESTYLE_REPORT.md`).
+The restyle changed how the app looks; this changed whether a feature can be
+found.
+
+Both roles are now labelled bottom-tab shells — patient **Home · Records ·
+Documents · More**, health worker **Scan · Patients · More** — and the two
+unlabeled `⋮` menus are gone. Nothing is more than two taps from a home screen.
+`SyncChip` became `SyncPill`, which always carries words and says the last sync
+time in words. First-run coach marks (three patient cards, two provider) are
+shown once per install, flagged in shared preferences. Empty states explain
+themselves and pull-to-refresh now works on an empty list. 47 new l10n keys in
+both `app_en.arb` and `app_ne.arb`; no existing key touched.
+
+**Nothing below `lib/features/` was edited** — no rules, triage, sync, outbox or
+repository change — and neither QR mode (`SWC1` grant, `SWC2` offline snapshot),
+the share sheet, the redeem paths, the mock or the "Use mock server" / Server URL
+settings were touched. The one forced change in `scan_screen.dart` is
+`pushReplacement` → `push` plus a camera restart, because a tab cannot replace
+itself.
+
+**670 tests, analyzer clean**, release APKs built with `--split-per-abi
+--dart-define=MOCK_API=true`. **No device was attached during the session**
+(`adb devices` empty on four polls), so every on-phone check — installing the
+build, the `ux_after_*` screenshots in `en` and `ne`, the logcat overflow sweep
+and the one offline QR end to end — is still outstanding. The checklist is at the
+end of `docs/UX_AUDIT.md`.

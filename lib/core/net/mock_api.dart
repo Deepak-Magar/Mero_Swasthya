@@ -678,15 +678,74 @@ class MockApi implements ApiTransport {
     return _pinsByUserId[owner] ?? demoPatientPin;
   }
 
+  /// DEMO: mock only — the real backend validates the JWT.
+  ///
+  /// True when [payload] carries the SWC1 prefix and [token] is exactly the
+  /// shape [_createGrant] mints: `mock_grant_` followed by a UUID. Anything
+  /// else — "HELLO", a bare token with no prefix, a truncated paste — is not
+  /// a grant and is left to fail.
+  static final RegExp _mockGrantToken = RegExp(
+    r'^mock_grant_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}'
+    r'-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  );
+
+  bool _looksLikeForeignGrant(String payload, String token) =>
+      payload.startsWith(qrPrefix) && _mockGrantToken.hasMatch(token);
+
+  /// DEMO: mock only — the real backend validates the JWT.
+  ///
+  /// Records the other phone's code as a grant on the seeded Sita so the rest
+  /// of [_redeemGrant] can run unchanged: one redeem path, one bundle, one
+  /// audit trail.
+  Map<String, dynamic> _adoptForeignGrant(String token) {
+    final id = token.substring('mock_grant_'.length);
+    _audit(sitaId, 'grant_created');
+    return _grants[id] = {
+      'id': id,
+      'patientId': sitaId,
+      'scope': 'append',
+      'token': token,
+      // Ten minutes from now rather than from whenever the other phone drew
+      // it: the two clocks are not the same clock, and an adopted code that
+      // arrives already expired would be worse than no leniency at all.
+      'expiresAt': _clock().toUtc().add(const Duration(minutes: 10))
+          .toIso8601String(),
+      'redeemedByUserId': null,
+      'redeemedAt': null,
+      'revokedAt': null,
+      'accessUntil': null,
+      'longLived': false,
+      'sections': <String>[],
+    };
+  }
+
   Map<String, dynamic> _redeemGrant(String qrPayload, [String? pin]) {
     final token = qrPayload.startsWith(qrPrefix)
         ? qrPayload.substring(qrPrefix.length)
         : qrPayload;
 
-    final grant = _grants.values.cast<Map<String, dynamic>?>().firstWhere(
+    var grant = _grants.values.cast<Map<String, dynamic>?>().firstWhere(
           (g) => g!['token'] == token,
           orElse: () => null,
         );
+
+    // DEMO: mock only — the real backend validates the JWT.
+    //
+    // Two phones running the mock each hold their own `_grants` map, so a code
+    // the patient's phone just drew is a code this instance has never heard of
+    // and the scan dies on "Unknown QR code". That kills the one moment the
+    // demo exists to show. When the payload is shaped like a code this mock
+    // would itself have issued — the SWC1 prefix and a `mock_grant_<uuid>`
+    // token — it is adopted and pointed at the seeded Sita, which is the
+    // record both phones are seeded with anyway.
+    //
+    // Nothing else is relaxed: a code this instance *did* issue still goes
+    // through the expiry, revoke and already-redeemed checks below, and a bad
+    // prefix or a payload that is not a grant token is still rejected.
+    if (grant == null && _looksLikeForeignGrant(qrPayload, token)) {
+      grant = _adoptForeignGrant(token);
+    }
+
     if (grant == null) {
       throw const AppError(
         code: AppError.notFound,

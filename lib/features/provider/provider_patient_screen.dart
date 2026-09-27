@@ -44,11 +44,18 @@ class ProviderPatientScreen extends ConsumerWidget {
     final expired = ref.watch(grantExpiredProvider(patientId)).valueOrNull ??
         false;
 
+    // A record that came off a patient's phone rather than off the server is a
+    // *summary*, frozen at the moment the QR was drawn. Saying so is the
+    // difference between a provider trusting an empty timeline and a provider
+    // asking the question out loud.
+    final offlineAt =
+        ref.watch(offlineSnapshotAtProvider(patientId)).valueOrNull;
+
     if (expired) {
       return Scaffold(
         appBar: AppBar(
           title: Text(value?.name ?? l10n.commonLoading),
-          actions: const [SyncChip(), SizedBox(width: AppSpacing.sm)],
+          actions: const [SyncPill.compact(), SizedBox(width: AppSpacing.sm)],
         ),
         body: Padding(
           padding: const EdgeInsets.all(AppSpacing.gutter),
@@ -64,7 +71,7 @@ class ProviderPatientScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(value?.name ?? l10n.commonLoading),
-        actions: const [SyncChip(), SizedBox(width: AppSpacing.sm)],
+        actions: const [SyncPill.compact(), SizedBox(width: AppSpacing.sm)],
       ),
       body: Column(
         children: [
@@ -72,6 +79,16 @@ class ProviderPatientScreen extends ConsumerWidget {
           // Outside the scroll view on purpose: a provider who has scrolled
           // down to the medicines must not be able to forget that this record
           // cannot be written to.
+          if (offlineAt != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.gutter,
+                AppSpacing.md,
+                AppSpacing.gutter,
+                0,
+              ),
+              child: _OfflineSnapshotBanner(at: offlineAt),
+            ),
           if (readOnly)
             const Padding(
               padding: EdgeInsets.fromLTRB(
@@ -95,23 +112,91 @@ class ProviderPatientScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar:
-          value == null || readOnly ? null : _ActionBar(patient: value),
+      // Shown in read-only mode as well, where it carries only Timeline: a
+      // printed-card redemption must still be able to read the record, and
+      // withholding the whole bar used to take the timeline with the write
+      // actions.
+      bottomNavigationBar: value == null
+          ? null
+          : _ActionBar(patient: value, readOnly: readOnly),
+    );
+  }
+}
+
+/// "Offline record from patient's phone — 11:42".
+///
+/// Thin, quiet and always visible: not a warning, just a provenance line. The
+/// record is real and can be written against; it simply stopped being current
+/// the moment the patient's screen drew the code.
+class _OfflineSnapshotBanner extends StatelessWidget {
+  const _OfflineSnapshotBanner({required this.at});
+
+  final DateTime at;
+
+  @override
+  Widget build(BuildContext context) {
+    final local = at.toLocal();
+    final time = '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.brandTintOf(context),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.cloud_off_outlined,
+            size: 18,
+            color: AppColors.brandOf(context),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              L.of(context).providerOfflineBanner(time),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.brandOf(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 /// The sticky action bar along the bottom of S21.
 ///
-/// Fixed rather than scrolled to: "Add visit" is what the provider came here to
-/// do, and on a long record it would otherwise be four swipes below the fold
+/// Fixed rather than scrolled to: everything here is what the provider came to
+/// do, and on a long record it would otherwise be several swipes below the fold
 /// exactly when the patient is standing in front of them.
 ///
-/// Absent entirely in read-only mode — see [ReadOnlyBanner].
+/// Two rows, and the split is the audit's eighth finding fixed:
+///
+///  * **The two most-used actions**, side by side and filled: *Add visit*, and
+///    *ANC contact N* whenever a pregnancy is open. Both used to be somewhere
+///    else — ANC contact was an outlined button inside the pregnancy card,
+///    which on a full record sat under the vitals and the medicines, and moved
+///    up and down the page depending on how much record there was. The most
+///    common maternal action on the screen is now always in the same place.
+///  * **A labelled "More actions" row** above them: *Capture paper*,
+///    *Register pregnancy*, *Timeline*. Named, visible, and in a fixed order —
+///    not an overflow icon, and not a row whose shape changes between patients.
+///
+/// In read-only mode (a printed-card redemption, spec A.7) every write action is
+/// withheld and only *Timeline* remains, so the record can still be read. The
+/// bar used to vanish entirely, which took the timeline with it.
 class _ActionBar extends ConsumerWidget {
-  const _ActionBar({required this.patient});
+  const _ActionBar({required this.patient, required this.readOnly});
 
   final Patient patient;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -121,49 +206,50 @@ class _ActionBar extends ConsumerWidget {
     bool shares(GrantSection s) => sections.isEmpty || sections.contains(s);
 
     final pregnancy = ref.watch(activePregnancyProvider(patient.id)).valueOrNull;
+    final bundle = pregnancy == null
+        ? null
+        : ref.watch(pregnancyBundleProvider(pregnancy.id)).valueOrNull;
+    final next = bundle == null ? null : nextContact(bundle.ancContacts);
 
     // Spec S11: offered only when she is female and has no pregnancy open —
     // A.6 case 12, enforced in the UI as well as in the API.
-    final canRegister = shares(GrantSection.pregnancy) &&
+    final canRegister = !readOnly &&
+        shares(GrantSection.pregnancy) &&
         patient.sex == Sex.female &&
         pregnancy == null;
 
-    // Two buttons share this row, so each gets about half a phone minus the
-    // icon. "Register pregnancy" does not fit on one line there and came out
-    // as "Register pregn…" on the device; a second line costs nothing and is
-    // the difference between a label and a guess.
-    const secondaryStyle = ButtonStyle(
+    // Compact enough to sit three-across in a scrolling row, tall enough to
+    // clear the 48 dp tap target.
+    const moreStyle = ButtonStyle(
       minimumSize: WidgetStatePropertyAll(Size(0, AppTheme.minTapTarget)),
       padding: WidgetStatePropertyAll(
-        EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
     );
 
-    final secondary = <Widget>[
-      if (shares(GrantSection.documents))
+    final more = <Widget>[
+      if (!readOnly && shares(GrantSection.documents))
         OutlinedButton.icon(
           onPressed: () => context.push('/patient/${patient.id}/documents'),
           icon: const Icon(Icons.camera_alt_outlined, size: 18),
-          style: secondaryStyle,
-          label: Text(
-            l10n.documentsCapture,
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
+          style: moreStyle,
+          label: Text(l10n.documentsCapture, maxLines: 1),
         ),
       if (canRegister)
         OutlinedButton.icon(
           onPressed: () => context.push('/patient/${patient.id}/pregnancy/new'),
           icon: const Icon(Icons.pregnant_woman_outlined, size: 18),
-          style: secondaryStyle,
-          label: Text(
-            l10n.patientHomeRegisterPregnancy,
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
+          style: moreStyle,
+          label: Text(l10n.patientHomeRegisterPregnancy, maxLines: 1),
         ),
+      // Up from the middle of the scroll view, where its position depended on
+      // how long the record was.
+      OutlinedButton.icon(
+        onPressed: () => context.push('/patient/${patient.id}/timeline'),
+        icon: const Icon(Icons.history_rounded, size: 18),
+        style: moreStyle,
+        label: Text(l10n.patientHomeTimeline, maxLines: 1),
+      ),
     ];
 
     return Container(
@@ -181,34 +267,93 @@ class _ActionBar extends ConsumerWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.gutter,
+            0,
             AppSpacing.md,
-            AppSpacing.gutter,
+            0,
             AppSpacing.md,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (secondary.isNotEmpty) ...[
-                Row(
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.gutter,
+                ),
+                child: SectionHeader(
+                  l10n.providerMoreActions,
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                ),
+              ),
+              // Scrolls horizontally rather than squeezing: three Devanagari
+              // labels do not fit across 360 dp, and shrinking them to fit is
+              // how a labelled button becomes an icon again.
+              SizedBox(
+                height: AppTheme.minTapTarget,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.gutter,
+                  ),
                   children: [
-                    for (var i = 0; i < secondary.length; i++) ...[
-                      if (i > 0) const SizedBox(width: AppSpacing.md),
-                      Expanded(child: secondary[i]),
+                    for (var i = 0; i < more.length; i++) ...[
+                      if (i > 0) const SizedBox(width: AppSpacing.sm),
+                      more[i],
                     ],
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-              ],
-              FilledButton.icon(
-                onPressed: () =>
-                    context.push('/provider/patient/${patient.id}/visit/new'),
-                icon: const Icon(Icons.add_rounded),
-                label: Text(l10n.providerAddVisit),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(54),
-                ),
               ),
+              if (!readOnly) ...[
+                const SizedBox(height: AppSpacing.md),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+                  child: Row(
+                    children: [
+                      if (next != null && shares(GrantSection.pregnancy)) ...[
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: () => context.push(
+                              '/pregnancy/${pregnancy!.id}'
+                              '/contact/${next.contactNo}',
+                            ),
+                            icon: const Icon(
+                              Icons.pregnant_woman_outlined,
+                              size: 18,
+                            ),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(54),
+                            ),
+                            label: Text(
+                              l10n.providerAncContactNext(next.contactNo),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                      ],
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => context
+                              .push('/provider/patient/${patient.id}/visit/new'),
+                          icon: const Icon(Icons.add_rounded),
+                          label: Text(
+                            l10n.providerAddVisit,
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(54),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -334,13 +479,6 @@ class _Body extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 _PregnancySection(pregnancy: pregnancy, readOnly: readOnly),
               ],
-
-              const SizedBox(height: AppSpacing.lg),
-              OutlinedButton.icon(
-                onPressed: () => context.push('/patient/${patient.id}/timeline'),
-                icon: const Icon(Icons.history_rounded, size: 18),
-                label: Text(l10n.patientHomeTimeline),
-              ),
 
               if (auth.user?.role == UserRole.fchv) ...[
                 const SizedBox(height: AppSpacing.lg),
@@ -608,15 +746,6 @@ class _PregnancySection extends ConsumerWidget {
                 ),
               ),
             ),
-            if (!readOnly) ...[
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: () => context.push(
-                  '/pregnancy/${pregnancy.id}/contact/${next.contactNo}',
-                ),
-                child: Text(l10n.ancContactTitle(next.contactNo)),
-              ),
-            ],
           ],
         ],
       ),

@@ -117,6 +117,22 @@ class SyncMetaDao extends DatabaseAccessor<AppDatabase>
   Future<List<String>> grantSections(String patientId) async =>
       _parseSections(await get(sectionsKey(patientId)));
 
+  /// When this device took an offline snapshot of [patientId], or null when
+  /// the record arrived the ordinary way.
+  ///
+  /// S21 draws its banner from this. It lives beside the read-only flag for
+  /// the same reason: it is a fact about *this device's copy*, not about the
+  /// patient.
+  static String offlineSnapshotKey(String patientId) =>
+      'offline_snapshot_at:$patientId';
+
+  Future<void> setOfflineSnapshotAt(String patientId, String iso) =>
+      set(offlineSnapshotKey(patientId), iso);
+
+  Stream<DateTime?> watchOfflineSnapshotAt(String patientId) =>
+      watch(offlineSnapshotKey(patientId))
+          .map((value) => value == null ? null : DateTime.tryParse(value));
+
   static List<String> _parseSections(String? raw) {
     if (raw == null || raw.isEmpty) return const [];
     return raw.split(',').where((s) => s.isNotEmpty).toList();

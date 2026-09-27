@@ -125,7 +125,7 @@ class _AncContactScreenState extends ConsumerState<AncContactScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.ancContactTitle(widget.contactNo)),
-        actions: const [SyncChip()],
+        actions: const [SyncPill.compact()],
       ),
       body: asyncView(
         bundle,
@@ -204,6 +204,7 @@ class _AncContactScreenState extends ConsumerState<AncContactScreen> {
               // enough to finish in a minute.
               FormSection(
                 title: l10n.ancFindings,
+                helper: l10n.ancFindingsHelper,
                 children: [
                   ..._interleave(_findingFields(l10n, checklist, expanded: true)),
                   if (extras.isNotEmpty)
@@ -231,6 +232,7 @@ class _AncContactScreenState extends ConsumerState<AncContactScreen> {
 
               FormSection(
                 title: l10n.ancNotes,
+                helper: l10n.ancNotesHelper,
                 children: [
                   TextField(
                     controller: _notes,
@@ -250,7 +252,10 @@ class _AncContactScreenState extends ConsumerState<AncContactScreen> {
               // Danger signs are large toggles rather than a list of
               // checkboxes: they are the input most likely to be ticked in a
               // hurry, in bad light, by somebody holding a torch.
-              SectionHeader(l10n.ancDangerSigns),
+              SectionHeader(
+                l10n.ancDangerSigns,
+                helper: l10n.ancDangerSignsHelper,
+              ),
               for (final sign in rules.dangerSignsForChecklist)
                 _DangerSignTile(
                   sign: sign,
