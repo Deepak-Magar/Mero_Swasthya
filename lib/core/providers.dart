@@ -18,6 +18,7 @@ import '../domain/models/models.dart';
 import '../domain/rules/epi_schedule.dart';
 import '../domain/rules/growth_reference.dart';
 import '../domain/rules/provider_dashboard.dart';
+import '../domain/rules/provider_home.dart';
 import '../domain/rules/rules.dart';
 import '../domain/summary.dart';
 import '../features/export/patient_pdf_service.dart';
@@ -434,6 +435,68 @@ final providerDashboardProvider = StreamProvider<ProviderDashboard>((ref) {
         monthEnd: month.end,
       );
     },
+  );
+});
+
+// ---------------------------------------------------------------------------
+// The provider Home tab
+// ---------------------------------------------------------------------------
+
+/// What time it is, as a provider so a test can pin "today".
+///
+/// The Home tab's greeting, its date line and every "today" count hang off
+/// this one reading; without it a widget test of the dashboard would pass or
+/// fail depending on the hour it ran.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// Everything the provider Home and Reminders tabs draw, from Drift alone.
+///
+/// Six streams behind one provider — patients, pregnancies, contacts, today's
+/// visits, the outbox and the recently-opened list — so the tiles move when a
+/// visit is saved or a sync lands without anybody refreshing. No request is
+/// made here or anywhere below it: this is the screen a health worker opens
+/// with no signal.
+///
+/// `autoDispose`, and invalidated by pull-to-refresh and by coming back to the
+/// Home tab, for the reason [grantedPatientsProvider] gives: "now" is bound
+/// when the streams are subscribed, and a provider kept for the life of the
+/// app would go on calling yesterday "today".
+final providerHomeProvider = StreamProvider.autoDispose<ProviderHome>((ref) {
+  final db = ref.watch(databaseProvider);
+  final now = ref.watch(clockProvider)();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+
+  final records = combineLatest4<List<Patient>, List<Pregnancy>,
+      List<AncContact>, List<Visit>, ProviderHome>(
+    db.patientsDao.watchCachedForProvider(now.toUtc().toIso8601String()),
+    db.pregnanciesDao.watchAllPregnancies(),
+    db.pregnanciesDao.watchAllContacts(),
+    // A day early, narrowed to the local day in `buildProviderHome`.
+    db.visitsDao.watchSince(
+      startOfDay.subtract(const Duration(days: 1)).toUtc().toIso8601String(),
+    ),
+    (patients, pregnancies, contacts, visits) => buildProviderHome(
+      patients: patients,
+      pregnancies: pregnancies,
+      contacts: contacts,
+      visits: visits,
+      now: now,
+    ),
+  );
+
+  final device = combineLatest2<List<String>, int, (List<String>, int)>(
+    db.syncMetaDao.watchRecentPatientIds(),
+    db.outboxDao.watchUnsettledCount(),
+    (recent, pending) => (recent, pending),
+  );
+
+  return combineLatest2<ProviderHome, (List<String>, int), ProviderHome>(
+    records,
+    device,
+    (home, device) => home.withDeviceState(
+      recentPatientIds: device.$1,
+      pendingSync: device.$2,
+    ),
   );
 });
 

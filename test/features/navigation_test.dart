@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mero_swasthya/core/config/app_config.dart';
 import 'package:mero_swasthya/core/l10n/gen/app_localizations.dart';
 import 'package:mero_swasthya/core/net/mock_api.dart';
@@ -12,11 +13,14 @@ import 'package:mero_swasthya/data/sync/connectivity.dart';
 import 'package:mero_swasthya/domain/models/enums.dart';
 import 'package:mero_swasthya/domain/models/models.dart';
 import 'package:mero_swasthya/features/documents/documents_screen.dart';
+import 'package:mero_swasthya/features/provider/provider_home_screen.dart';
 import 'package:mero_swasthya/features/shell/coach_marks.dart';
 import 'package:mero_swasthya/features/shell/patient_home_tab.dart';
 import 'package:mero_swasthya/features/shell/patient_more_tab.dart';
 import 'package:mero_swasthya/features/shell/patient_shell.dart';
+import 'package:mero_swasthya/features/shell/provider_home_tab.dart';
 import 'package:mero_swasthya/features/shell/provider_more_tab.dart';
+import 'package:mero_swasthya/features/shell/provider_reminders_tab.dart';
 import 'package:mero_swasthya/features/shell/provider_shell.dart';
 import 'package:mero_swasthya/features/shell/shell_scaffold.dart';
 import 'package:mero_swasthya/features/timeline/timeline_screen.dart';
@@ -316,38 +320,120 @@ void main() {
   });
 
   group('provider shell', () {
-    // The Scan tab holds a live `MobileScanner`, which a widget test has no
-    // camera for — so this exercises the shell the provider actually gets by
-    // starting from the tab bar rather than from the camera: the destinations
-    // are asserted, and the More tab is opened and read.
-    testWidgets('three labelled tabs, and More carries the dashboard',
-        (tester) async {
-      await pump(tester, const ProviderShell(),
-          prefs: {'coach_seen:provider': true});
-      final l10n = await L.delegate.load(const Locale('en'));
+    // The provider shell is a `StatefulShellRoute`, so it is pumped inside a
+    // router of its own with the pushed screens — the camera above all —
+    // replaced by stubs that name themselves. See `providerRouterForTest`.
+    Future<(GoRouter, AppConfig)> pumpProvider(
+      WidgetTester tester, {
+      Map<String, Object> prefs = const {'coach_seen:provider': true},
+    }) async {
+      SharedPreferences.setMockInitialValues(Map<String, Object>.from(prefs));
+      final config = await AppConfig.load();
+      final router = providerRouterForTest();
+      addTearDown(router.dispose);
 
-      for (final label in [l10n.navScan, l10n.navPatients, l10n.navMore]) {
-        expect(
-          find.descendant(
-            of: find.byType(NavigationBar),
-            matching: find.text(label),
-          ),
-          findsOneWidget,
-          reason: 'the $label tab must carry its name',
-        );
-      }
+      // A phone, not the 800×600 default: the Patients tab's empty state is
+      // sized as a share of the screen height and is four pixels too tall
+      // for a window that short.
+      tester.view.physicalSize = const Size(412, 915);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.tap(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.text(l10n.navMore),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appConfigProvider.overrideWithValue(config),
+            databaseProvider.overrideWithValue(db),
+            connectivityProvider.overrideWithValue(const AlwaysOnline()),
+            apiTransportProvider.overrideWithValue(MockApi()),
+          ],
+          child: routerAppForTest(router),
         ),
       );
       await settle(tester);
+      return (router, config);
+    }
 
+    Finder barLabel(String label) => find.descendant(
+          of: find.byType(BottomAppBar),
+          matching: find.text(label),
+        );
+
+    /// The Android back button as the router sees it, and long enough for
+    /// the popped route to finish leaving.
+    Future<void> routerBack(WidgetTester tester) async {
+      await tester.binding.handlePopRoute();
+      await tester.pump(const Duration(milliseconds: 400));
+      await settle(tester);
+    }
+
+    testWidgets('Home · Patients · [Scan] · Reminders · More, all labelled',
+        (tester) async {
+      final (router, _) = await pumpProvider(tester);
+      final l10n = await L.delegate.load(const Locale('en'));
+
+      expect(router.state.uri.path, ProviderTabs.home);
+      expect(find.byType(ProviderHomeTab), findsOneWidget);
+
+      for (final label in [
+        l10n.navHome,
+        l10n.navPatients,
+        l10n.navScan,
+        l10n.navReminders,
+        l10n.navMore,
+      ]) {
+        expect(barLabel(label), findsOneWidget,
+            reason: 'the $label destination must carry its name');
+      }
+
+      // The centre button: raised, round, docked, and named.
+      final fab = tester.widget<FloatingActionButton>(
+        find.byType(FloatingActionButton),
+      );
+      expect(fab.shape, isA<CircleBorder>());
+      expect(fab.tooltip, l10n.providerScanQr);
+      expect(
+        tester.widget<Scaffold>(find.byType(Scaffold).first)
+            .floatingActionButtonLocation,
+        FloatingActionButtonLocation.centerDocked,
+      );
+
+      await finish(tester);
+    });
+
+    testWidgets('each tab shows its own screen, and Scan works from all of them',
+        (tester) async {
+      final (router, _) = await pumpProvider(tester);
+      final l10n = await L.delegate.load(const Locale('en'));
+
+      Future<void> scanFromHere() async {
+        await tester.tap(find.byType(FloatingActionButton));
+        await settle(tester);
+        expect(find.text('stub:scan'), findsOneWidget);
+        expect(router.state.uri.path, ProviderTabs.scan);
+        await routerBack(tester);
+        expect(find.text('stub:scan'), findsNothing);
+      }
+
+      await scanFromHere();
+      expect(find.byType(ProviderHomeTab), findsOneWidget);
+
+      await tester.tap(barLabel(l10n.navPatients));
+      await settle(tester);
+      expect(find.byType(ProviderHomeScreen), findsOneWidget);
+      expect(router.state.uri.path, ProviderTabs.patients);
+      await scanFromHere();
+      expect(find.byType(ProviderHomeScreen), findsOneWidget);
+
+      await tester.tap(barLabel(l10n.navReminders));
+      await settle(tester);
+      expect(find.byType(ProviderRemindersTab), findsOneWidget);
+      await scanFromHere();
+
+      await tester.tap(barLabel(l10n.navMore));
+      await settle(tester);
       expect(find.byType(ProviderMoreTab), findsOneWidget);
-      // All three were behind the app bar's `⋮` or competing with the scan
-      // tile for the top of the landing screen.
       for (final label in [
         l10n.dashboardAction,
         l10n.providerMyFamily,
@@ -355,19 +441,74 @@ void main() {
       ]) {
         expect(find.text(label), findsOneWidget, reason: '$label is missing');
       }
+      await scanFromHere();
 
-      // Back from More returns to Scan, the landing tab, rather than exiting.
-      await systemBack(tester);
-      expect(find.byType(ProviderMoreTab), findsNothing);
+      await tester.tap(barLabel(l10n.navHome));
+      await settle(tester);
+      expect(find.byType(ProviderHomeTab), findsOneWidget);
+
+      await finish(tester);
+    });
+
+    testWidgets('back from any tab goes to Home; back from Home leaves the app',
+        (tester) async {
+      final (router, _) = await pumpProvider(tester);
+      final l10n = await L.delegate.load(const Locale('en'));
+
+      await tester.tap(barLabel(l10n.navMore));
+      await settle(tester);
+      expect(router.state.uri.path, ProviderTabs.more);
+
+      await routerBack(tester);
+      expect(router.state.uri.path, ProviderTabs.home);
+      expect(find.byType(ProviderHomeTab), findsOneWidget);
+
+      // On Home the shell lets the pop through to the platform, which is
+      // what exits the app: the router reports nothing left to pop.
+      expect(await tester.binding.handlePopRoute(), isFalse);
+      await settle(tester);
+      expect(find.byType(ProviderHomeTab), findsOneWidget);
+
+      await finish(tester);
+    });
+
+    testWidgets('the tour points at Scan, then at Needs attention, once',
+        (tester) async {
+      final (_, config) = await pumpProvider(tester, prefs: const {});
+      final l10n = await L.delegate.load(const Locale('en'));
+
+      expect(config.coachSeen(CoachTour.provider), isFalse);
+      expect(find.text(l10n.coachScanButtonTitle), findsOneWidget);
+
+      final marks =
+          tester.widget<CoachMarks>(find.byType(CoachMarks)).marks;
+      expect(marks.length, lessThanOrEqualTo(3));
+      expect(marks[0].target, ProviderCoachTargets.scanButton);
+      expect(marks[1].target, ProviderCoachTargets.needsAttention);
+
+      await tester.tap(find.text(l10n.coachNext));
+      await settle(tester);
+      expect(find.text(l10n.coachAttentionTitle), findsOneWidget);
+      expect(find.text(l10n.coachDone), findsOneWidget);
+
+      await tester.tap(find.text(l10n.coachDone));
+      await settle(tester);
+      expect(find.text(l10n.coachAttentionTitle), findsNothing);
+      expect(config.coachSeen(CoachTour.provider), isTrue);
+
+      await finish(tester);
+
+      await pumpProvider(tester);
+      expect(find.text(l10n.coachScanButtonTitle), findsNothing);
 
       await finish(tester);
     });
   });
 
   group('shell mechanics', () {
-    // The shell is tested on its own as well as through PatientShell, because
-    // the provider side reuses it with a live camera in its first tab — which a
-    // widget test cannot pump — and the contract has to hold there too.
+    // The shell is tested on its own as well as through PatientShell: the
+    // contract — one tab built at a time, the index visible to the tab — is
+    // the shell's, not the patient screens'.
     testWidgets('only the current tab is built', (tester) async {
       var builtA = 0;
       var builtB = 0;
@@ -402,8 +543,7 @@ void main() {
       expect(
         builtB,
         0,
-        reason: 'a tab that is not on screen must not be built — the provider '
-            'Scan tab holds a camera',
+        reason: 'a tab that is not on screen must not be built',
       );
       expect(find.text('B body'), findsNothing);
 

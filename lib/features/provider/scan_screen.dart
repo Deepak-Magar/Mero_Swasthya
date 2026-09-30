@@ -20,7 +20,14 @@ import 'pin_challenge_dialog.dart';
 /// point: scan once at the door, then work through the consultation with no
 /// signal.
 class ScanScreen extends ConsumerStatefulWidget {
-  const ScanScreen({super.key});
+  const ScanScreen({super.key, this.openManualEntry = false});
+
+  /// Open "Enter code instead" as soon as the screen is up.
+  ///
+  /// The provider Home tab's text link. It is the route in, and nothing more:
+  /// the dialog it opens and the redeem it feeds are the ones the button under
+  /// the viewfinder has always used.
+  final bool openManualEntry;
 
   @override
   ConsumerState<ScanScreen> createState() => _ScanScreenState();
@@ -31,6 +38,20 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
   bool _handling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openManualEntry) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Only over a live scanner: offline, the screen shows its own
+        // "needs internet" state and the manual path is not on offer either.
+        final online =
+            ref.read(syncStatusProvider).valueOrNull?.online ?? true;
+        if (mounted && online) _enterCodeManually();
+      });
+    }
+  }
 
   @override
   void dispose() {

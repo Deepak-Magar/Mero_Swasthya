@@ -19,7 +19,9 @@ import 'package:mero_swasthya/features/child/child_health_screen.dart';
 import 'package:mero_swasthya/features/documents/documents_screen.dart';
 import 'package:mero_swasthya/features/shell/patient_home_tab.dart';
 import 'package:mero_swasthya/features/shell/patient_more_tab.dart';
+import 'package:mero_swasthya/features/shell/provider_home_tab.dart';
 import 'package:mero_swasthya/features/shell/provider_more_tab.dart';
+import 'package:mero_swasthya/features/shell/provider_reminders_tab.dart';
 import 'package:mero_swasthya/features/family/patient_form_screen.dart';
 import 'package:mero_swasthya/features/maternal/anc_contact_screen.dart';
 import 'package:mero_swasthya/features/maternal/delivery_screen.dart';
@@ -30,6 +32,7 @@ import 'package:mero_swasthya/features/provider/provider_activate_screen.dart';
 import 'package:mero_swasthya/features/provider/provider_dashboard_screen.dart';
 import 'package:mero_swasthya/features/provider/provider_home_screen.dart';
 import 'package:mero_swasthya/features/provider/provider_patient_screen.dart';
+import 'package:mero_swasthya/features/provider/provider_visits_today_screen.dart';
 import 'package:mero_swasthya/features/provider/visit_form_screen.dart';
 import 'package:mero_swasthya/features/reminders/reminders_screen.dart';
 import 'package:mero_swasthya/features/settings/settings_screen.dart';
@@ -234,7 +237,16 @@ void main() {
 
   group('provider screens', () {
     screenFits('S18 activation', () => const ProviderActivateScreen());
+    // The seed has an overdue contact and a red one, so Home renders its
+    // needs-attention rows and its due list rather than the calm card.
+    screenFits('provider Home tab', () => const ProviderHomeTab());
+    screenFits('provider Reminders tab', () => const ProviderRemindersTab());
     screenFits('S19 patients tab', () => const ProviderHomeScreen());
+    screenFits(
+      'S19 patients tab, seen today',
+      () => const ProviderHomeScreen(seenTodayOnly: true),
+    );
+    screenFits('visits today', () => const ProviderVisitsTodayScreen());
     screenFits('provider More tab', () => const ProviderMoreTab());
     screenFits(
       'S21 provider summary',

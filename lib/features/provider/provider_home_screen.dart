@@ -11,25 +11,34 @@ import '../../shared/widgets/soft_card.dart';
 import '../../shared/widgets/brand_logo.dart';
 import '../auth/auth_controller.dart';
 import '../shared/widgets/app_widgets.dart';
-import '../shell/shell_scaffold.dart';
+import '../shell/provider_shell.dart';
 
 /// S19 — the provider shell's Patients tab: everyone whose grant is still open.
 ///
-/// The scan tile that used to sit at the top of this screen is gone, because
-/// scanning is now the shell's first tab — a health worker with a patient at the
-/// door reaches the camera with no taps at all rather than one. What is left is
-/// what this screen was always for: coming back to somebody already scanned.
+/// The scan tile that used to sit at the top of this screen is gone: scanning
+/// is the shell's centre button, on every tab. What is left is what this
+/// screen was always for: coming back to somebody already scanned.
 ///
 /// The unlabeled `⋮` that used to hold "My family" and "Settings" is gone too;
 /// both are named rows in the More tab.
+///
+/// With [seenTodayOnly] — Home's "Patients seen" tile — the list is instead
+/// everyone with a visit or an ANC contact recorded today, owned records
+/// included, under a filter chip that clears back to the full list.
 class ProviderHomeScreen extends ConsumerWidget {
-  const ProviderHomeScreen({super.key});
+  const ProviderHomeScreen({super.key, this.seenTodayOnly = false});
+
+  final bool seenTodayOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L.of(context);
     final auth = ref.watch(authProvider);
-    final granted = ref.watch(grantedPatientsProvider);
+    final granted = seenTodayOnly
+        ? ref
+            .watch(providerHomeProvider)
+            .whenData((home) => home.seenToday)
+        : ref.watch(grantedPatientsProvider);
 
     Future<void> refresh() => ref.read(syncEngineProvider).run();
 
@@ -66,7 +75,19 @@ class ProviderHomeScreen extends ConsumerWidget {
               AppSpacing.gutter,
               0,
             ),
-            child: SectionHeader(l10n.providerRecentPatients),
+            child: seenTodayOnly
+                ? SectionHeader(
+                    l10n.providerSeenTodayFilter,
+                    // The filter, and the way out of it: a chip whose cross
+                    // returns to the whole list.
+                    trailing: InputChip(
+                      label: Text(l10n.providerSeenTodayFilter),
+                      avatar: const Icon(Icons.today_outlined, size: 18),
+                      deleteButtonTooltipMessage: l10n.providerShowAllPatients,
+                      onDeleted: () => context.go(ProviderTabs.patients),
+                    ),
+                  )
+                : SectionHeader(l10n.providerRecentPatients),
           ),
           Expanded(
             child: asyncView(
@@ -80,26 +101,32 @@ class ProviderHomeScreen extends ConsumerWidget {
                       children: [
                         SizedBox(
                           height: MediaQuery.sizeOf(context).height * 0.55,
-                          child: EmptyState(
-                            icon: Icons.qr_code_scanner_rounded,
-                            title: l10n.providerNoRecentPatients,
-                            body: l10n.providerNoRecentPatientsBody,
-                            action: FilledButton.icon(
-                              // Switches to the Scan tab rather than pushing a
-                              // second scanner over this one. Outside the shell
-                              // — a widget test — there is no tab, so it pushes.
-                              onPressed: () {
-                                final shell = ShellScope.maybeOf(context);
-                                if (shell == null) {
-                                  context.push('/provider/scan');
-                                } else {
-                                  shell.select(0);
-                                }
-                              },
-                              icon: const Icon(Icons.qr_code_scanner_rounded),
-                              label: Text(l10n.providerScanQr),
-                            ),
-                          ),
+                          child: seenTodayOnly
+                              ? EmptyState(
+                                  icon: Icons.today_outlined,
+                                  title: l10n.providerSeenTodayEmpty,
+                                  body: l10n.providerSeenTodayEmptyBody,
+                                  action: OutlinedButton(
+                                    onPressed: () =>
+                                        context.go(ProviderTabs.patients),
+                                    child: Text(l10n.providerShowAllPatients),
+                                  ),
+                                )
+                              : EmptyState(
+                                  icon: Icons.qr_code_scanner_rounded,
+                                  title: l10n.providerNoRecentPatients,
+                                  body: l10n.providerNoRecentPatientsBody,
+                                  action: FilledButton.icon(
+                                    // The scanner is a pushed route now, the
+                                    // same one the centre button opens.
+                                    onPressed: () =>
+                                        context.push(ProviderTabs.scan),
+                                    icon: const Icon(
+                                      Icons.qr_code_scanner_rounded,
+                                    ),
+                                    label: Text(l10n.providerScanQr),
+                                  ),
+                                ),
                         ),
                       ],
                     ),

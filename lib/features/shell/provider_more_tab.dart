@@ -11,11 +11,10 @@ import 'more_row.dart';
 
 /// The provider shell's More tab.
 ///
-/// Three rows, all of them previously behind an unlabeled `⋮` or a button that
+/// Four rows, all of them previously behind an unlabeled `⋮` or a button that
 /// competed with the scan tile for the top of the screen. The health-post
-/// dashboard belongs here rather than on the landing tab: it is a once-a-day
-/// read, and the landing tab is what a health worker opens with a patient in
-/// front of them.
+/// dashboard belongs here rather than on Home: Home carries today's counts
+/// and who needs attention, and the six-tile report is a once-a-day read.
 class ProviderMoreTab extends ConsumerWidget {
   const ProviderMoreTab({super.key});
 

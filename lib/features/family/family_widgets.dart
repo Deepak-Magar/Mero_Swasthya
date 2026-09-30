@@ -181,8 +181,9 @@ class _AddChip extends StatelessWidget {
               Text(
                 // "Add family member" is three words too long for 72 dp, so
                 // the chip carries the verb and the semantic label carries the
-                // sentence.
-                label.split(' ').first,
+                // sentence. The verb is its own key: Nepali puts it last, so
+                // the first word of the sentence would read "family's".
+                L.of(context).commonAdd,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,

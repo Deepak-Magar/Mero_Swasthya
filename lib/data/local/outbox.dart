@@ -136,6 +136,19 @@ class OutboxDao extends DatabaseAccessor<AppDatabase> with _$OutboxDaoMixin {
         .watchSingle();
   }
 
+  /// Every op that has not reached the server, rejected ones included.
+  ///
+  /// The provider Home tab's "pending sync" tile. It differs from
+  /// [watchPendingCount] on purpose: a rejected op is still a change that is
+  /// only on this phone, and a tile reading 0 beside a sync pill reading "Not
+  /// synced" would be the two of them disagreeing about the same queue.
+  Stream<int> watchUnsettledCount() {
+    final count = outbox.opId.count();
+    return (selectOnly(outbox)..addColumns([count]))
+        .map((row) => row.read(count) ?? 0)
+        .watchSingle();
+  }
+
   /// Row ids with an unsettled op, for the "pending" cloud icon (spec §7) and
   /// for the pull step, which must not overwrite a row that is still queued.
   Stream<Set<String>> watchPendingRowIds() {

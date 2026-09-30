@@ -241,7 +241,13 @@ class SyncPill extends ConsumerWidget {
     };
 
     final label = switch (status.chip) {
-      SyncChipState.offline => l10n.commonOffline,
+      // Offline outranks pending for the colour, but the full pill still owes
+      // the answer to "is my entry saved?" — without the count, a record
+      // added in airplane mode looked exactly like nothing having happened.
+      SyncChipState.offline => !compact && status.pending > 0
+          ? '${l10n.commonOffline} · '
+              '${l10n.syncChangesWaiting(status.pending)}'
+          : l10n.commonOffline,
       SyncChipState.failed => l10n.syncFailed,
       // The count is the message either way; the wording differs only in how
       // much room there is to say it.

@@ -158,7 +158,7 @@ class _OfflineSnapshotBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              L.of(context).providerOfflineBanner(time),
+              L.of(context).providerSnapshotBanner(time),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.brandOf(context),
                     fontWeight: FontWeight.w600,

@@ -111,8 +111,8 @@ class _Body extends ConsumerWidget {
               FactRow(
                 label: l10n.pregnancyEdd,
                 value: BsDateText(
+                  // Spec S12: the header EDD is BS *and* AD.
                   pregnancy.edd,
-                  showAd: false,
                   style: text.bodyMedium?.copyWith(
                     color: AppColors.textSecondaryOf(context),
                   ),

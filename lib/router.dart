@@ -22,12 +22,18 @@ import 'features/patient_home/patient_home_screen.dart';
 import 'features/patient_home/printed_card_screen.dart';
 import 'features/provider/provider_activate_screen.dart';
 import 'features/provider/provider_dashboard_screen.dart';
+import 'features/provider/provider_home_screen.dart';
 import 'features/provider/provider_patient_screen.dart';
+import 'features/provider/provider_visits_today_screen.dart';
+import 'features/provider/provider_widgets.dart';
 import 'features/provider/scan_screen.dart';
 import 'features/provider/visit_form_screen.dart';
 import 'features/reminders/reminders_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/shell/patient_shell.dart';
+import 'features/shell/provider_home_tab.dart';
+import 'features/shell/provider_more_tab.dart';
+import 'features/shell/provider_reminders_tab.dart';
 import 'features/shell/provider_shell.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/sync/sync_screen.dart';
@@ -163,14 +169,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // --- Provider: S18–S22 -----------------------------------------------
-      // Likewise S19: the three provider tabs hang off '/provider', and Scan
-      // is the landing tab.
-      GoRoute(path: '/provider', builder: (_, _) => const ProviderShell()),
+      // The four provider tabs are branches of one stateful shell; everything
+      // else under '/provider' is a full screen pushed over it, the scanner
+      // included, so the bar and the centre button belong to the tabs alone.
+      providerShellRoute(),
       GoRoute(
         path: '/provider/activate',
         builder: (_, _) => const ProviderActivateScreen(),
       ),
-      GoRoute(path: '/provider/scan', builder: (_, _) => const ScanScreen()),
+      GoRoute(
+        path: ProviderTabs.scan,
+        builder: (_, state) => ScanScreen(
+          openManualEntry: state.uri.queryParameters['manual'] == '1',
+        ),
+      ),
+      GoRoute(
+        path: '/provider/visits/today',
+        builder: (_, _) => const ProviderVisitsTodayScreen(),
+      ),
       GoRoute(
         path: '/provider/dashboard',
         builder: (_, _) => const ProviderDashboardScreen(),
@@ -186,8 +202,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/provider/patient/:id',
-        builder: (_, state) =>
-            ProviderPatientScreen(patientId: state.pathParameters['id']!),
+        // Noted for Home's "Recent patients" on the way in, whichever way in
+        // it was.
+        builder: (_, state) => RecentPatientRecorder(
+          patientId: state.pathParameters['id']!,
+          child: ProviderPatientScreen(patientId: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/provider/patient/:id/visit/new',
@@ -219,6 +239,58 @@ final routerProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+/// The provider shell: Home · Patients · [Scan] · Reminders · More.
+///
+/// A function rather than a literal in the table so the navigation tests can
+/// mount exactly this shell — branches, paths and back behaviour — inside a
+/// router of their own, with the scanner and the pushed screens stubbed out.
+///
+/// `/provider` itself is the Home branch, so every `context.go('/provider')`
+/// and the auth redirect land on the dashboard without knowing the shell
+/// exists.
+StatefulShellRoute providerShellRoute() {
+  return StatefulShellRoute.indexedStack(
+    builder: (_, _, navigationShell) =>
+        ProviderShell(navigationShell: navigationShell),
+    branches: [
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: ProviderTabs.home,
+            builder: (_, _) => const ProviderHomeTab(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: ProviderTabs.patients,
+            builder: (_, state) => ProviderHomeScreen(
+              seenTodayOnly: state.uri.queryParameters['seen'] == 'today',
+            ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: ProviderTabs.reminders,
+            builder: (_, _) => const ProviderRemindersTab(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: ProviderTabs.more,
+            builder: (_, _) => const ProviderMoreTab(),
+          ),
+        ],
+      ),
+    ],
+  );
+}
 
 /// Bridges Riverpod to go_router: `/provider/activate` changing the role, or a
 /// refused refresh token, both have to move the user without anyone navigating.

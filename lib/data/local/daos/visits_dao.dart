@@ -30,6 +30,22 @@ class VisitsDao extends DatabaseAccessor<AppDatabase> with _$VisitsDaoMixin {
     return row?.toModel();
   }
 
+  /// Every visit on this device from [fromIso] onwards — the provider Home
+  /// tab's "visits recorded today".
+  ///
+  /// `visit_at` is an ISO-8601 string and is compared as text, so the caller
+  /// passes a bound a day early and narrows to the exact local day itself: two
+  /// stamps a few milliseconds apart are not reliably ordered as text, and a
+  /// day's slack costs a handful of rows.
+  Stream<List<Visit>> watchSince(String fromIso) {
+    return (select(visits)
+          ..where((t) =>
+              t.visitAt.isBiggerOrEqualValue(fromIso) & t.deleted.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.visitAt)]))
+        .watch()
+        .map((rows) => rows.map((r) => r.toModel()).toList());
+  }
+
   Stream<Visit?> watchById(String id) {
     return (select(visits)..where((t) => t.id.equals(id)))
         .watchSingleOrNull()

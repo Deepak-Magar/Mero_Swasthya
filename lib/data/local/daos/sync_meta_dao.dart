@@ -139,6 +139,36 @@ class SyncMetaDao extends DatabaseAccessor<AppDatabase>
   }
 
   // -------------------------------------------------------------------------
+  // Recently opened patients (the provider Home tab)
+  // -------------------------------------------------------------------------
+
+  /// Which records a health worker opened last, most recent first.
+  ///
+  /// Device state like the rest of this table — it is about what *this phone*
+  /// was used for, it never syncs, and a sign-out clears it with everything
+  /// else. A comma-separated list because patient ids contain no commas and
+  /// the list is never longer than [recentPatientsLimit].
+  static const String recentPatientsKey = 'provider_recent_patients';
+  static const int recentPatientsLimit = 10;
+
+  Future<void> recordPatientOpened(String patientId) async {
+    final current = _parseSections(await get(recentPatientsKey));
+    // Already at the front: opening the same record twice in a row is the
+    // common case, and it should not cost a write.
+    if (current.isNotEmpty && current.first == patientId) return;
+
+    await set(
+      recentPatientsKey,
+      [patientId, ...current.where((id) => id != patientId)]
+          .take(recentPatientsLimit)
+          .join(','),
+    );
+  }
+
+  Stream<List<String>> watchRecentPatientIds() =>
+      watch(recentPatientsKey).map(_parseSections);
+
+  // -------------------------------------------------------------------------
   // Signed-in user
   // -------------------------------------------------------------------------
 

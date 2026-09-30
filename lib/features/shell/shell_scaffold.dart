@@ -24,15 +24,14 @@ class ShellTab {
 
   /// Built on demand rather than held in an `IndexedStack`.
   ///
-  /// This is load-bearing on the provider side: the Scan tab *is* the camera,
-  /// and an `IndexedStack` would keep `MobileScannerController` running — and
-  /// the torch available — while the provider reads a dashboard on another tab.
-  /// Building one tab at a time means leaving Scan disposes the camera, which
-  /// is both the correct behaviour and the one the battery wants.
-  ///
-  /// The cost is a scroll position: coming back to a tab rebuilds it at the
-  /// top. On four short screens driven by Drift streams that is not a cost
-  /// worth an always-live camera.
+  /// This was load-bearing while the provider side used this shell with the
+  /// camera as its first tab: an `IndexedStack` would have kept
+  /// `MobileScannerController` running — and the torch available — behind a
+  /// dashboard. The provider side has since moved to a `StatefulShellRoute`
+  /// with the scanner pushed from a centre button (`ProviderShell`); the
+  /// patient shell keeps this behaviour because nothing on it needs the
+  /// scroll position an `IndexedStack` would preserve, and one tab at a time
+  /// is the cheaper of the two.
   final WidgetBuilder builder;
 }
 
@@ -87,8 +86,7 @@ class ShellScaffold extends StatefulWidget {
 
   final List<ShellTab> tabs;
 
-  /// Which tab opens first. The provider shell opens on Scan, because that is
-  /// why the phone came out of the pocket.
+  /// Which tab opens first.
   final int initialIndex;
 
   /// Drawn above the current tab and below the navigation bar — the first-run
